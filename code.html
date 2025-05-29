@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Aetherium Chronicles RPG Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&amp;family=Metal+Mania&amp;family=Uncial+Antiqua&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+    <audio id="alertSound" src="cinematic-music-sketches-11-cinematic-percussion-sketch-116186.mp3"
+        preload="auto"></audio>
+    <audio id="backgroundMusic" preload="auto"></audio>
+
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
+
+
+    <style>
+        /* Общие стили */
+        body {
+            font-family: 'IM Fell English SC', serif;
+            background-color: #4a3b31;
+            color: #e0ccb1;
+            overflow-x: hidden;
+            position: relative;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        .steampunk-border {
+            border: 4px solid #8c6c4f;
+            box-shadow: 0 0 10px #8c6c4f, inset 0 0 10px #5a3d2b;
+            border-radius: 8px;
+            background-color: #6b5a48;
+            transition: border-color 0.5s, box-shadow 0.5s, background-color 0.5s;
+        }
+
+        .steampunk-button {
+            background-color: #8c6c4f;
+            color: #e0ccb1;
+            border: 2px solid #5a3d2b;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-family: 'Metal Mania', cursive;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .steampunk-button:disabled {
+            background-color: #5a3d2b;
+            color: #a08c77;
+            cursor: not-allowed;
+            border-color: #4a3b31;
+        }
+
+        .steampunk-button:disabled:hover {
+            box-shadow: none;
+        }
+
+        .steampunk-button:hover:not(:disabled) {
+            background-color: #a07b5c;
+            box-shadow: 0 0 15px #a07b5c;
+        }
+
+        /* Стили плеера */
+        .steampunk-player {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background-color: #6b5a48e0;
+            border: 3px solid #8c6c4f;
+            box-shadow: 0 0 8px #8c6c4f, inset 0 0 8px #5a3d2b;
+            border-radius: 6px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.5s, border-color 0.5s, box-shadow 0.5s, opacity 0.3s ease-in-out;
+            opacity: 0.7;
+        }
+
+        .steampunk-player:hover {
+            opacity: 1;
+        }
+
+        .steampunk-player button {
+            background-color: #8c6c4f;
+            color: #e0ccb1;
+            border: 2px solid #5a3d2b;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+        }
+
+        .steampunk-player button .material-icons {
+            font-size: 20px;
+        }
+
+        .steampunk-player button:hover:not(:disabled) {
+            background-color: #a07b5c;
+            box-shadow: 0 0 10px #a07b5c;
+        }
+
+        .steampunk-player input[type="range"] {
+            width: 100px;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #5a3d2b;
+            border-radius: 5px;
+            border: 1px solid #8c6c4f;
+            cursor: pointer;
+            transition: background-color 0.5s, border-color 0.5s;
+        }
+
+        .steampunk-player input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #c8a079;
+            border-radius: 50%;
+            border: 2px solid #5a3d2b;
+            transition: background-color 0.5s, border-color 0.5s;
+        }
+
+        .steampunk-player input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #c8a079;
+            border-radius: 50%;
+            border: 2px solid #5a3d2b;
+            cursor: pointer;
+            transition: background-color 0.5s, border-color 0.5s;
+        }
+
+        .track-info {
+            font-family: 'IM Fell English SC', serif;
+            color: #e0ccb1;
+            font-size: 0.9em;
+            margin-left: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+            transition: color 0.5s;
+        }
+
+        /* Кнопка ночного режима */
+        .theme-toggle-button {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1010;
+            padding: 8px;
+        }
+
+        /* Кнопка Access Portal */
+        .user-access-button-container {
+            position: fixed;
+            top: 15px;
+            right: 75px;
+            z-index: 1005;
+            transition: right 0.3s ease-in-out;
+        }
+
+        .user-access-button-container .steampunk-button.minimized {
+            padding: 6px 8px;
+            font-size: 0.9em;
+        }
+
+        .user-access-button-container .steampunk-button.minimized .material-icons {
+            margin-right: 4px;
+        }
+
+        .user-access-button-container .steampunk-button.minimized .button-text {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .user-access-button-container {
+                right: 15px;
+                top: 70px;
+            }
+
+            .user-access-button-container .steampunk-button:not(.minimized) {
+                padding: 6px 8px;
+                font-size: 0.9em;
+            }
+
+            .user-access-button-container .steampunk-button:not(.minimized) .material-icons {
+                margin-right: 0;
+            }
+
+            .user-access-button-container .steampunk-button:not(.minimized) .button-text {
+                display: none;
+            }
+        }
+
+        /* Шестерни (иконки) и светлячки */
+        .decorative-element {
+            position: absolute;
+            opacity: 0.3;
+            z-index: 0;
+            transition: opacity 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Важно: чтобы не влияли на поток, если они display:none (или visibility:hidden) */
+            /* visibility: hidden; */
+            /* Альтернатива display: none, если нужно сохранить место */
+        }
+
+        .decorative-element.visible {
+            /* Класс для управления видимостью через JS */
+            /* visibility: visible; */
+            opacity: 0.3;
+            /* Или другая начальная видимость */
+        }
+
+        .decorative-element.hidden {
+            /* visibility: hidden; */
+            display: none !important;
+            /* Более сильное скрытие */
+            opacity: 0;
+        }
+
+        .decorative-element.draggable {
+            cursor: grab;
+            pointer-events: auto;
+        }
+
+        .decorative-element.dragging {
+            opacity: 0.6;
+            z-index: 10;
+            cursor: grabbing;
+        }
+
+        .decorative-element .material-icons {
+            animation: spin 10s linear infinite;
+            color: #8c6c4f;
+        }
+
+        .decorative-element .material-icons.gear-glow-effect {
+            filter: drop-shadow(0 0 12px rgba(173, 216, 230, 0.9)) brightness(1.6);
+            transition: filter 0.3s;
+        }
+
+        .decorative-element .gear-sparks-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-image: radial-gradient(circle, #aef, transparent 60%);
+            animation: sparkle 0.6s ease-out;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            transform: scale(0);
+        }
+
+        .decorative-element .material-icons.gear-glow-effect~.gear-sparks-effect {
+            transform: scale(1);
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .firefly-bg-element {
+            /* Этот контейнер сам по себе может быть display: none */
+            position: absolute;
+            /* Важно, чтобы не влиял на поток */
+            /* Размеры такие же, как у .decorative-element, чтобы занимать то же место */
+            /* width, height, top, left будут заданы инлайн-стилями */
+        }
+
+        .firefly {
+            width: 5px;
+            height: 5px;
+            background-color: #c1ff72;
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 0 8px 2px #c1ff72, 0 0 12px 4px rgba(193, 255, 114, 0.5);
+            animation: firefly-twinkle 3s infinite ease-in-out, firefly-drift 10s infinite linear alternate;
+        }
+
+        @keyframes firefly-twinkle {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes firefly-drift {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            25% {
+                transform: translate(5px, -3px);
+            }
+
+            50% {
+                transform: translate(-2px, 4px);
+            }
+
+            75% {
+                transform: translate(3px, 2px);
+            }
+
+            100% {
+                transform: translate(0, 0);
+            }
+        }
+
+        body:not(.night-mode) .firefly-bg-element {
+            display: none !important;
+        }
+
+        body.night-mode .decorative-element>.material-icons {
+            display: none !important;
+        }
+
+        body.night-mode .decorative-element {
+            pointer-events: none;
+        }
+
+
+        /* Ночная тема */
+        body.night-mode {
+            background-color: #2a1f1a;
+            color: #b0a090;
+        }
+
+        body.night-mode .steampunk-border {
+            border-color: #5c4c3f;
+            box-shadow: 0 0 10px #4a3b31, inset 0 0 10px #382c22;
+            background-color: #4b3a28;
+        }
+
+        body.night-mode .steampunk-button {
+            background-color: #5c4c3f;
+            color: #b0a090;
+            border-color: #3a2d1b;
+        }
+
+        body.night-mode .steampunk-button:hover:not(:disabled) {
+            background-color: #705b4c;
+            box-shadow: 0 0 15px #705b4c;
+        }
+
+        body.night-mode .steampunk-button:disabled {
+            background-color: #3a2d1b;
+            color: #7a6c57;
+            border-color: #2a1f1a;
+        }
+
+        body.night-mode .font-steampunk-title {
+            color: #d8c0a9;
+            text-shadow: 2px 2px #1a140f;
+        }
+
+        body.night-mode header p,
+        body.night-mode .text-amber-200,
+        body.night-mode .text-amber-100 {
+            color: #c0b0a0;
+        }
+
+        body.night-mode .news-panel {
+            background-color: #281c12;
+            border-top-color: #5c4c3f;
+        }
+
+        body.night-mode .news-panel-header {
+            border-bottom-color: #5c4c3f;
+        }
+
+        body.night-mode .newspaper-title {
+            color: #c4a887;
+            text-shadow: 1px 1px #1a1a1a, 2px 2px #5c4c3f;
+        }
+
+        body.night-mode .news-column {
+            background-color: rgba(180, 160, 140, 0.05);
+            border-color: #4a3d2b;
+            border-right-color: #503923;
+        }
+
+        body.night-mode .news-column h4 {
+            color: #d8b089;
+            border-bottom-color: #5c4c3f;
+            text-shadow: 1px 1px #18120f;
+        }
+
+        body.night-mode .news-item {
+            border-bottom-color: #503923;
+        }
+
+        body.night-mode .news-item strong {
+            color: #c0b0a0;
+        }
+
+        body.night-mode .news-item em {
+            color: #af977a;
+        }
+
+        body.night-mode .steampunk-player {
+            background-color: #4b3a28e0;
+            border-color: #5c4c3f;
+            box-shadow: 0 0 8px #4a3b31, inset 0 0 8px #382c22;
+            opacity: 0.6;
+        }
+
+        body.night-mode .steampunk-player:hover {
+            opacity: 1;
+        }
+
+        body.night-mode .steampunk-player button {
+            background-color: #5c4c3f;
+            color: #b0a090;
+            border-color: #3a2d1b;
+        }
+
+        body.night-mode .steampunk-player button:hover:not(:disabled) {
+            background-color: #705b4c;
+        }
+
+        body.night-mode .steampunk-player input[type="range"] {
+            background: #3a2d1b;
+            border-color: #5c4c3f;
+        }
+
+        body.night-mode .steampunk-player input[type="range"]::-webkit-slider-thumb {
+            background: #b89069;
+            border-color: #3a2d1b;
+        }
+
+        body.night-mode .steampunk-player input[type="range"]::-moz-range-thumb {
+            background: #b89069;
+            border-color: #3a2d1b;
+        }
+
+        body.night-mode .track-info {
+            color: #b0a090;
+        }
+
+        body.night-mode input,
+        body.night-mode textarea,
+        body.night-mode select {
+            background-color: #b0a090;
+            color: #2a1f1a;
+            border-color: #5c4c3f;
+        }
+
+        body.night-mode input[type="file"]::file-selector-button {
+            background-color: #5c4c3f;
+            color: #b0a090;
+        }
+
+        body.night-mode .indicator-panel {
+            background-color: rgba(50, 40, 30, 0.3);
+            border-color: #4a3d2b;
+        }
+
+        body.night-mode .text-sky-300 {
+            color: #77a2b3;
+        }
+
+        body.night-mode .text-orange-400 {
+            color: #d08f66;
+        }
+
+        body.night-mode .text-neutral-400 {
+            color: #909090;
+        }
+
+        body.night-mode .dice-roller-panel {
+            background-color: #4b3a28e0;
+            border-color: #5c4c3f;
+            box-shadow: 2px 0 10px #382c22;
+        }
+
+        body.night-mode #diceHistory {
+            border-top-color: #5c4c3f;
+        }
+
+        body.night-mode .decorative-element .material-icons {
+            color: #5c4c3f;
+        }
+
+
+        /* Панель кубиков */
+        .dice-roller-panel {
+            position: fixed;
+            left: -300px;
+            /* Ширина панели 300px - ширина ярлыка ~48px */
+            top: 100px;
+            width: 300px;
+            background-color: #6b5a48e0;
+            border: 3px solid #8c6c4f;
+            border-left: none;
+            /* Убираем левую рамку у самой панели */
+            border-radius: 0 8px 8px 0;
+            box-shadow: 2px 0 10px #5a3d2b;
+            z-index: 990;
+            transition: left 0.4s ease-in-out, background-color 0.5s, border-color 0.5s;
+            padding: 10px 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dice-roller-panel.open {
+            left: 0;
+        }
+
+        .dice-roller-panel .toggle-button {
+            position: absolute;
+            right: -48px;
+            /* Ширина кнопки */
+            top: 10px;
+            padding: 8px;
+            border-radius: 0 5px 5px 0 !important;
+            border-left: none !important;
+            /* Убираем левую рамку у кнопки-ярлыка */
+            writing-mode: initial;
+            transform: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            /* Явно задаем ширину */
+            height: 48px;
+            /* И высоту для квадратности */
+        }
+
+        .dice-roller-panel .toggle-button .material-icons {
+            font-size: 28px;
+        }
+
+        .dice-formula-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .dice-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .dice-action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        #diceResultDisplay {
+            font-size: 1.5em;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            overflow: hidden;
+            border: 2px dashed #5a3d2b;
+            padding: 10px;
+        }
+
+        body.night-mode #diceResultDisplay {
+            border-color: #3a2d1b;
+        }
+
+        #diceRollAnimation {
+            display: inline-block;
+            animation: rollAnim 0.5s ease-out;
+        }
+
+        @keyframes rollAnim {
+            0% {
+                transform: translateY(-30px) rotateX(90deg);
+                opacity: 0;
+            }
+
+            50% {
+                transform: translateY(10px) rotateX(-30deg);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: translateY(0) rotateX(0deg);
+                opacity: 1;
+            }
+        }
+
+        #diceHistory {
+            margin-top: 15px;
+            font-size: 0.8em;
+            max-height: 100px;
+            overflow-y: auto;
+            border-top: 1px dashed #8c6c4f;
+            padding-top: 10px;
+        }
+
+        #diceHistory div {
+            padding: 2px 0;
+            opacity: 0.8;
+        }
+
+        #diceHistory div:first-child {
+            opacity: 1;
+            font-weight: bold;
+        }
+
+        .gauge-container {
+            width: 120px;
+            height: 60px;
+            position: relative;
+            border: 3px solid #5a3d2b;
+            border-radius: 60px 60px 0 0;
+            background: conic-gradient(#d2b48c 0deg 180deg, transparent 180deg 360deg);
+            overflow: hidden;
+            margin: 10px auto 5px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: box-shadow .3s ease, filter .3s ease, opacity .3s ease;
+        }
+
+        .gauge-arrow {
+            width: 2px;
+            height: 54px;
+            background-color: #1a1a1a;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-90deg);
+            transition: transform 1s cubic-bezier(.68, -.55, .27, 1.55);
+            border-radius: 1px 1px 0 0;
+        }
+
+        .gauge-arrow::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: #1a1a1a;
+            border-radius: 50%;
+        }
+
+        .crystal-container {
+            width: 60px;
+            height: 120px;
+            border: 3px solid #708090;
+            border-radius: 30px 30px 6px 6px/12px 12px 60px 60px;
+            position: relative;
+            overflow: hidden;
+            background-color: #2f4f4f;
+            margin: 10px auto 5px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: box-shadow .3s ease, filter .3s ease, opacity .3s ease;
+        }
+
+        .crystal-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, #4682b4, #87ceeb);
+            transition: height 1s ease-out;
+            box-shadow: 0 0 12px #87ceeb;
+            display: block;
+        }
+
+        .barometer-container {
+            width: 50px;
+            height: 160px;
+            border: 4px solid #7a5c3d;
+            border-radius: 25px 25px 6px 6px;
+            position: relative;
+            overflow: hidden;
+            background-color: #523a28;
+            margin: 10px auto 5px;
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, .6);
+            transition: box-shadow .3s ease;
+        }
+
+        .barometer-liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, #1a0e05, #4d2a0f);
+            transition: height 1.2s cubic-bezier(.23, 1, .32, 1);
+            box-shadow: 0 0 10px #3c1f0a;
+        }
+
+        .barometer-glass-sheen {
+            position: absolute;
+            top: 5%;
+            left: 10%;
+            width: 20%;
+            height: 80%;
+            background: rgba(224, 204, 177, .15);
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        .news-panel {
+            position: relative;
+            bottom: auto;
+            left: auto;
+            right: auto;
+            margin-top: 40px;
+            max-height: 40vh;
+            background-color: #382c22;
+            border-top: 4px solid #8c6c4f;
+            padding: 0;
+            overflow: hidden;
+            font-size: .9em;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            transition: max-height .5s ease-in-out;
+            width: 100%;
+        }
+
+        .news-panel.collapsed {
+            max-height: 65px;
+        }
+
+        .news-panel-header {
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 2px double #8c6c4f;
+        }
+
+        .newspaper-title {
+            font-family: Uncial Antiqua, cursive;
+            font-size: 2.5rem;
+            text-align: center;
+            color: #d4b897;
+            text-shadow: 1px 1px #1a1a1a, 2px 2px #8c6c4f;
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+            flex-grow: 1;
+        }
+
+        .toggle-news-btn {
+            font-size: 1.5rem;
+            color: #c8a079;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .toggle-news-btn .material-icons {
+            transition: transform .3s ease;
+        }
+
+        .news-panel.collapsed .toggle-news-btn .material-icons {
+            transform: rotate(180deg);
+        }
+
+        .newspaper-content {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .newspaper-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .news-column {
+            background-color: rgba(224, 204, 177, .05);
+            border: 1px solid #5a3d2b;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-y: auto;
+            max-height: calc(40vh - 100px);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px dashed #705943;
+        }
+
+        .news-column:last-child {
+            border-right: none;
+        }
+
+        .news-column h4 {
+            font-family: Metal Mania, cursive;
+            font-size: 1.2rem;
+            color: #c8a079;
+            border-bottom: 2px solid #8c6c4f;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            text-shadow: 1px 1px #382c22;
+        }
+
+        .news-item {
+            margin-bottom: 5px;
+            border-bottom: 1px dashed #705943;
+            padding-bottom: 5px;
+            font-size: .85em;
+            line-height: 1.3;
+            position: relative;
+            padding-right: 50px;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .news-item strong {
+            color: #e0ccb1;
+            font-weight: 700;
+        }
+
+        .news-item em {
+            color: #bfa78a;
+            font-style: italic;
+        }
+
+        .news-item-actions {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            opacity: 0;
+            transition: opacity .2s ease-in-out;
+        }
+
+        .news-item:hover .news-item-actions {
+            opacity: 1;
+        }
+
+        .news-item-btn {
+            background: none;
+            border: none;
+            color: #c8a079;
+            cursor: pointer;
+            padding: 2px 3px;
+            margin-left: 2px;
+            font-size: .8rem;
+        }
+
+        .news-item-btn .material-icons {
+            font-size: 1rem;
+            vertical-align: middle;
+        }
+
+        .news-item-btn:hover {
+            color: #e0ccb1;
+        }
+
+        .news-feed-column {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .archive-controls {
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px solid #5a3d2b;
+            text-align: center;
+        }
+
+        .view-archive-btn {
+            font-size: .8em;
+            padding: 5px 10px;
+        }
+
+        .user-panel {
+            position: fixed;
+            top: 20px;
+            right: -400px;
+            width: 350px;
+            padding: 20px;
+            transition: right .5s ease-in-out;
+            z-index: 100;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .user-panel.open {
+            right: 20px;
+        }
+
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, .7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .3s ease, visibility .3s ease;
+        }
+
+        .login-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .login-form {
+            padding: 30px;
+            width: 350px;
+        }
+
+        .main-content.blur {
+            filter: blur(5px);
+            transition: filter .3s ease;
+        }
+
+        .main-content {
+            transition: filter .3s ease;
+            padding-bottom: 50px;
+            min-height: 100vh;
+        }
+
+        input[type=number],
+        input[type=password],
+        input[type=text],
+        input[type=file],
+        textarea,
+        select {
+            background-color: #e0ccb1;
+            color: #4a3b31;
+            border: 2px solid #8c6c4f;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: IM Fell English SC, serif;
+        }
+
+        input[type=file] {
+            padding: 3px;
+        }
+
+        input[type=file]::-webkit-file-selector-button {
+            background-color: #8c6c4f;
+            color: #e0ccb1;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 2px;
+            font-family: Metal Mania, cursive;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%234a3b31' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right .7rem center;
+            background-size: 1em;
+            padding-right: 2.5rem;
+        }
+
+        input[type=number]:focus,
+        input[type=password]:focus,
+        input[type=text]:focus,
+        input[type=file]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 10px #a07b5c;
+        }
+
+        .font-steampunk-title {
+            font-family: Metal Mania, cursive;
+            font-size: 2.2rem;
+            color: #c8a079;
+            text-shadow: 2px 2px #382c22;
+        }
+
+        .player-stat-card {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .player-stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #8c6c4f;
+        }
+
+        .player-stat-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .player-stat-label {
+            font-weight: 700;
+            color: #d4b897;
+        }
+
+        .player-stat-value {
+            color: #e0ccb1;
+        }
+
+        .news-column::-webkit-scrollbar,
+        .user-panel::-webkit-scrollbar,
+        .news-feed-column::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .news-column::-webkit-scrollbar-track,
+        .user-panel::-webkit-scrollbar-track,
+        .news-feed-column::-webkit-scrollbar-track {
+            background: #5a3d2b;
+            border-radius: 4px;
+        }
+
+        .news-column::-webkit-scrollbar-thumb,
+        .user-panel::-webkit-scrollbar-thumb,
+        .news-feed-column::-webkit-scrollbar-thumb {
+            background: #8c6c4f;
+            border-radius: 4px;
+        }
+
+        .news-column::-webkit-scrollbar-thumb:hover,
+        .user-panel::-webkit-scrollbar-thumb:hover,
+        .news-feed-column::-webkit-scrollbar-thumb:hover {
+            background: #a07b5c;
+        }
+
+        .interactive-map-container {
+            width: 100%;
+            height: 450px;
+            background-color: #2f2a24;
+            border: 3px solid #8c6c4f;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, .4);
+            cursor: grab;
+        }
+
+        .interactive-map-content {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            transform-origin: 0 0;
+            transition: transform .2s ease-out;
+        }
+
+        .interactive-map-container.grabbing .interactive-map-content {
+            cursor: grabbing;
+        }
+
+        .map-marker {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #fff;
+            box-shadow: 0 0 5px #000;
+            user-select: none;
+            transform-origin: center;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            transition: transform .1s ease;
+            z-index: 20;
+        }
+
+        .map-marker:active {
+            cursor: grabbing;
+            transform: scale(1.3);
+            z-index: 100;
+        }
+
+        .map-marker:hover {
+            z-index: 30;
+        }
+
+        .map-marker-tooltip {
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(40, 30, 20, .9);
+            color: #e0ccb1;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: .8em;
+            white-space: nowrap;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity .2s, visibility .2s;
+            border: 1px solid #8c6c4f;
+            z-index: 10;
+        }
+
+        .map-marker:hover .map-marker-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .indicator-panel {
+            position: relative;
+            padding: 15px;
+            background-color: rgba(74, 59, 49, .3);
+            border-radius: 8px;
+            border: 2px solid #5a3d2b;
+        }
+
+        .indicator-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .indicator-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .engine-light {
+            width: 15px;
+            height: 15px;
+            background-color: #ffcc00;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulseLight 2s infinite;
+            box-shadow: 0 0 8px #ffcc00;
+            display: inline-block;
+        }
+
+        @keyframes pulseLight {
+            0% {
+                opacity: .5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: .5;
+            }
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .map-control-btn {
+            background-color: #8c6c4f;
+            color: #e0ccb1;
+            border: 1px solid #5a3d2b;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            font-family: Metal Mania, cursive;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color .2s;
+        }
+
+        .map-control-btn:hover:not(:disabled) {
+            background-color: #a07b5c;
+        }
+
+        .map-control-btn .material-icons {
+            font-size: 18px;
+        }
+
+        .news-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, .8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 300;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .3s ease, visibility .3s ease;
+        }
+
+        .news-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .news-modal-content {
+            padding: 30px;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .news-modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .news-modal-content::-webkit-scrollbar-track {
+            background: #5a3d2b;
+            border-radius: 4px;
+        }
+
+        .news-modal-content::-webkit-scrollbar-thumb {
+            background: #8c6c4f;
+            border-radius: 4px;
+        }
+
+        .news-modal-content::-webkit-scrollbar-thumb:hover {
+            background: #a07b5c;
+        }
+
+        @keyframes sparkle {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(2);
+            }
+        }
+
+        .crystal-container.stage-closed {
+            filter: grayscale(1) opacity(.3);
+        }
+
+        .crystal-container.stage-closed .crystal-fill {
+            display: none;
+        }
+
+        .crystal-container.stage-glow {
+            box-shadow: 0 0 15px 8px #87ceeb99;
+        }
+
+        .crystal-container.stage-critical {
+            animation: crystal-flash .5s infinite alternate;
+        }
+
+        @keyframes crystal-flash {
+            0% {
+                box-shadow: 0 0 8px #87ceeb;
+            }
+
+            100% {
+                box-shadow: 0 0 20px #0ff;
+            }
+        }
+
+        .crystal-container.stage-overloaded::after {
+            content: "";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #87ceebcc, transparent 70%);
+            transform: translateX(-50%);
+            animation: steam-rise-strong 1.5s infinite ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes steam-rise-strong {
+            0% {
+                opacity: .9;
+                transform: translateX(-50%) translateY(0) scale(.8);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-60px) scale(2.5);
+            }
+        }
+
+        .gauge-container.stage-closed {
+            opacity: .3;
+            filter: grayscale(1);
+        }
+
+        .gauge-container.stage-glow {
+            box-shadow: 0 0 10px 4px #ffcc00aa;
+        }
+
+        .gauge-container.stage-critical {
+            animation: pulse-red .4s infinite alternate;
+            box-shadow: 0 0 6px #ff5e5e;
+        }
+
+        .gauge-container.stage-overloaded::after {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ff6600aa, transparent 60%);
+            transform: translateX(-50%);
+            animation: steam-rise 1.5s infinite ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 4px #ff4d4d;
+            }
+
+            100% {
+                box-shadow: 0 0 8px red;
+            }
+        }
+
+        .barometer-container.stage-glow {
+            box-shadow: 0 0 15px 6px #b580ffaa;
+        }
+
+        .barometer-container.stage-critical {
+            animation: pulse-purple .6s infinite alternate;
+        }
+
+        .barometer-container.stage-overloaded::after {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ae7bff88, transparent 70%);
+            transform: translateX(-50%);
+            animation: steam-rise 1.5s infinite ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes pulse-purple {
+            0% {
+                box-shadow: 0 0 8px #cc99ff;
+            }
+
+            100% {
+                box-shadow: 0 0 20px #a64dff;
+            }
+        }
+
+        @keyframes steam-rise {
+            0% {
+                opacity: .8;
+                transform: translateX(-50%) translateY(0) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px) scale(1.5);
+            }
+        }
+
+        .map-navigation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        #currentMapNameDisplay {
+            font-size: 1.5em;
+            min-width: 150px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .map-management-buttons {
+            margin-left: auto;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .map-management-buttons .steampunk-button,
+        .map-management-buttons label.steampunk-button {
+            padding-top: 6px;
+            padding-bottom: 6px;
+        }
+
+        #mapPlaceholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #a08c77;
+            display: none;
+            pointer-events: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #mapPlaceholder .material-icons {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        body.night-mode #mapPlaceholder {
+            color: #7a6c57;
+        }
+    </style>
+</head>
+
+<body class="overflow-y-auto">
+    <div class="steampunk-player" id="steampunkPlayerContainer">
+        <button id="playerPrevTrackBtn"><span class="material-icons">skip_previous</span></button>
+        <button id="playerPlayPauseBtn"><span class="material-icons">play_arrow</span></button>
+        <button id="playerNextTrackBtn"><span class="material-icons">skip_next</span></button>
+        <input type="range" id="playerVolumeSlider" min="0" max="1" step="0.01" value="0.3">
+        <span id="playerTrackInfo" class="track-info"></span>
+    </div>
+
+    <button class="steampunk-button theme-toggle-button" id="themeToggleBtn">
+        <span class="material-icons">brightness_4</span>
+    </button>
+
+    <div class="user-access-button-container" id="userAccessButtonContainer">
+        <button class="steampunk-button text-sm py-2 px-3 flex items-center" id="toggleUserPanelBtn">
+            <span class="material-icons mr-2">login</span><span class="button-text">Access Portal</span>
+        </button>
+    </div>
+
+    <div id="diceRollerPanel" class="dice-roller-panel">
+        <button class="steampunk-button toggle-button" id="toggleDicePanelBtn">
+            <span class="material-icons">casino</span>
+        </button>
+        <div class="p-2">
+            <h4 class="font-steampunk-title text-lg mb-3 text-center">Dice Roller</h4>
+            <input type="text" id="diceFormulaInput" class="dice-formula-input steampunk-border"
+                placeholder="e.g., 2d6 + d4 + 3">
+            <div class="dice-buttons-grid">
+                <button class="steampunk-button text-sm py-1" data-dice-add="d4">d4</button>
+                <button class="steampunk-button text-sm py-1" data-dice-add="d6">d6</button>
+                <button class="steampunk-button text-sm py-1" data-dice-add="d8">d8</button>
+                <button class="steampunk-button text-sm py-1" data-dice-add="d10">d10</button>
+                <button class="steampunk-button text-sm py-1" data-dice-add="d12">d12</button>
+                <button class="steampunk-button text-sm py-1" data-dice-add="d20">d20</button>
+            </div>
+            <div class="dice-action-buttons">
+                <button class="steampunk-button text-sm py-1 px-3 bg-amber-700 hover:bg-amber-600 border-amber-900"
+                    id="clearDiceHistoryBtn">Clear History</button>
+                <button class="steampunk-button text-sm py-1 px-3" id="rollDiceFormulaBtn">Roll</button>
+            </div>
+            <div id="diceResultDisplay"
+                class="text-center text-xl font-bold mt-2 p-2 steampunk-border bg-opacity-20 min-h-[50px]">-</div>
+            <div id="diceHistory" class="mt-3"></div>
+        </div>
+    </div>
+
+    <div class="decorative-element draggable" style="top: 5%; left: 5%; width: 100px; height: 100px;">
+        <span class="material-icons" style="font-size: 100px !important; animation-duration: 12s;">settings</span>
+        <div class="gear-sparks-effect"></div>
+    </div>
+    <div class="decorative-element draggable" style="top: 60%; right: 2%; width: 60px; height: 60px;">
+        <span class="material-icons"
+            style="font-size: 60px !important; animation-duration: 8s; animation-direction: reverse;">settings</span>
+        <div class="gear-sparks-effect"></div>
+    </div>
+    <div class="decorative-element draggable" style="top: 80vh; left: 2%; width: 120px; height: 120px;">
+        <span class="material-icons" style="font-size: 120px !important; animation-duration: 15s;">settings</span>
+        <div class="gear-sparks-effect"></div>
+    </div>
+    <div class="decorative-element draggable" style="top: 90vh; right: 5%; width: 90px; height: 90px;">
+        <span class="material-icons"
+            style="font-size: 90px !important; animation-duration: 10s; animation-direction: reverse;">settings</span>
+        <div class="gear-sparks-effect"></div>
+    </div>
+
+    <div class="firefly-bg-element" style="top: 5%; left: 5%; width: 100px; height: 100px;"></div>
+    <div class="firefly-bg-element" style="top: 60%; right: 2%; width: 60px; height: 60px;"></div>
+    <div class="firefly-bg-element" style="top: 80vh; left: 2%; width: 120px; height: 120px;"></div>
+    <div class="firefly-bg-element" style="top: 90vh; right: 5%; width: 90px; height: 90px;"></div>
+
+
+    <div class="main-content container mx-auto p-4 flex flex-col items-center" id="mainContent">
+        <header class="text-center my-6 md:my-8">
+            <h1 class="font-steampunk-title text-4xl">Aetherium Chronicles</h1>
+            <p class="text-lg text-amber-200">The Age of Gears and Sorcery</p>
+        </header>
+        <div class="w-full mx-auto" id="dashboardContent">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                <div class="lg:col-span-2 steampunk-border p-3">
+                    <div class="map-navigation">
+                        <button class="steampunk-button text-xs py-1 px-2 map-nav-btn" id="prevMapBtn"
+                            title="Previous Map">
+                            <span class="material-icons text-sm">arrow_back_ios</span>
+                        </button>
+                        <h2 class="font-steampunk-title text-amber-300" id="currentMapNameDisplay">Map Name</h2>
+                        <button class="steampunk-button text-xs py-1 px-2 map-nav-btn" id="nextMapBtn" title="Next Map">
+                            <span class="material-icons text-sm">arrow_forward_ios</span>
+                        </button>
+                        <div class="map-management-buttons">
+                            <input accept="image/*" class="hidden" id="mapImageInput" type="file" />
+                            <button class="steampunk-button text-xs" id="uploadNewMapBtn"
+                                title="Upload New Map (adds to list)">
+                                <span class="material-icons text-sm mr-1">add_photo_alternate</span> <span
+                                    class="hidden sm:inline">New Map</span>
+                            </button>
+                            <button class="steampunk-button text-xs" id="replaceMapImageBtn"
+                                title="Replace Image of Current Map">
+                                <span class="material-icons text-sm mr-1">image_search</span> <span
+                                    class="hidden sm:inline">Replace Img</span>
+                            </button>
+                            <button class="steampunk-button text-xs" id="renameMapBtn" title="Rename Current Map">
+                                <span class="material-icons text-sm mr-1">drive_file_rename_outline</span> <span
+                                    class="hidden sm:inline">Rename</span>
+                            </button>
+                            <button class="steampunk-button text-xs bg-red-700 hover:bg-red-600 border-red-900"
+                                id="deleteMapBtn" title="Delete Current Map">
+                                <span class="material-icons text-sm">delete_forever</span> <span
+                                    class="hidden sm:inline">Delete</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="interactive-map-container" id="interactiveMapContainer">
+                        <div class="interactive-map-content" id="interactiveMapContent">
+                            <div id="mapPlaceholder">
+                                <span class="material-icons">castle</span>
+                                <p>No map loaded or no markers yet.<br>Upload a map or add markers!</p>
+                            </div>
+                        </div>
+                        <div class="map-controls">
+                            <button class="map-control-btn" id="zoomInBtn"><span
+                                    class="material-icons">add</span></button>
+                            <button class="map-control-btn" id="zoomOutBtn"><span
+                                    class="material-icons">remove</span></button>
+                            <button class="map-control-btn" id="resetMapBtn"><span
+                                    class="material-icons">refresh</span></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="indicator-panel" id="indicatorPanel">
+                    <div class="indicator-item relative" data-indicator-id="magic">
+                        <h2 class="text-lg font-steampunk-title mb-1 text-sky-300 text-center">Aetherial Font</h2>
+                        <div class="crystal-container steampunk-border mx-auto">
+                            <div class="crystal-fill" id="magicCrystalFill"></div>
+                        </div>
+                        <p class="text-sm mt-1 text-center">Magic: <span id="magicValueDisplay">0</span>%</p>
+                    </div>
+                    <div class="indicator-item relative" data-indicator-id="pressure">
+                        <h2 class="text-lg font-steampunk-title mb-1 text-orange-400 text-center">Chronomantic Pressure
+                        </h2>
+                        <div class="gauge-container steampunk-border mx-auto">
+                            <div class="gauge-arrow" id="pressureGaugeArrow"></div>
+                        </div>
+                        <p class="text-sm mt-1 text-center">Pressure: <span id="pressureValueDisplay">0</span>%</p>
+                    </div>
+                    <div class="indicator-item relative" data-indicator-id="darkness">
+                        <h2 class="text-lg font-steampunk-title mb-1 text-neutral-400 text-center">Umbral Barometer</h2>
+                        <div class="barometer-container steampunk-border mx-auto">
+                            <div class="barometer-liquid" id="darknessBarometerFill"></div>
+                            <div class="barometer-glass-sheen"></div>
+                        </div>
+                        <p class="text-sm mt-1 text-center">Darkness: <span id="darknessValueDisplay">0</span>%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 text-center w-full lg:col-span-3">
+                <p class="text-amber-100 text-lg mb-6"> The world of Aetherium is vast and ever-changing. Explore its
+                    wonders, uncover its secrets, and forge your legend amidst the whirring gears and crackling
+                    enchantments. </p>
+                <p class="text-amber-100 text-md"> From the towering, smog-choked cities of the Artificers' Guilds to
+                    the mystical, crystal-laden forests where ancient magic still holds sway, adventure awaits at every
+                    turn. Will you master the intricate clockwork mechanisms or delve into the forbidden lore of the
+                    arcane? The choice, and the consequences, are yours. </p>
+            </div>
+        </div>
+        <div class="news-panel steampunk-border mt-10" id="newsPanel">
+            <div class="news-panel-header" id="newsPanelHeader">
+                <h3 class="newspaper-title">The Aetherium Chronicle</h3>
+                <button class="toggle-news-btn" id="toggleNewsBtn">
+                    <span class="material-icons">expand_less</span>
+                </button>
+            </div>
+            <div class="newspaper-content">
+                <div class="newspaper-grid">
+                    <div class="news-column" data-column-id="playerNewsColumn" id="playerNewsColumn">
+                        <h4>Heroes' Herald</h4>
+                        <div class="news-feed-column" id="playerNewsFeed">
+                            <div class="news-item"><em>Awaiting dispatches on the adventurers' latest exploits...</em>
+                            </div>
+                        </div>
+                        <div class="archive-controls">
+                            <button class="steampunk-button view-archive-btn" data-column-id="playerNewsColumn">View
+                                Archive</button>
+                        </div>
+                    </div>
+                    <div class="news-column" data-column-id="worldNewsColumn" id="worldNewsColumn">
+                        <h4>World Stage</h4>
+                        <div class="news-feed-column" id="worldNewsFeed">
+                            <div class="news-item">The Grand Cogswork reports a breakthrough in aether-compression!
+                                Effects on travel and industry are anticipated.</div>
+                            <div class="news-item">Rumors of sky-leviathans stirring in the Cloudcoil Mountains
+                                intensify as a merchant airship goes missing.</div>
+                        </div>
+                        <div class="archive-controls">
+                            <button class="steampunk-button view-archive-btn" data-column-id="worldNewsColumn">View
+                                Archive</button>
+                        </div>
+                    </div>
+                    <div class="news-column" data-column-id="territoryNewsColumn" id="territoryNewsColumn">
+                        <h4>Regional Reports</h4>
+                        <div class="news-feed-column" id="territoryNewsFeed">
+                            <div class="news-item"><strong>Ironclad Peaks:</strong> Miners unearth a strange, pulsating
+                                ore deep within Mount Cinder. The Foreman has called for investigation.</div>
+                            <div class="news-item"><strong>Whispering Mire:</strong> Local tribes report unusual
+                                luminescence from the ancient bog ruins. Scholars are perplexed.</div>
+                        </div>
+                        <div class="archive-controls">
+                            <button class="steampunk-button view-archive-btn" data-column-id="territoryNewsColumn">View
+                                Archive</button>
+                        </div>
+                    </div>
+                    <div class="news-column" data-column-id="randomWorldNewsColumn" id="randomWorldNewsColumn">
+                        <h4>Whispers on the Wind</h4>
+                        <div class="news-feed-column" id="randomWorldNewsFeed">
+                            <div class="news-item">A peculiar comet was sighted over the capital, its tail shimmering
+                                with unknown energies.</div>
+                            <div class="news-item">The Alchemists' Guild announces new tariffs on enchanted metals,
+                                citing scarcity.</div>
+                        </div>
+                        <div class="archive-controls">
+                            <button class="steampunk-button view-archive-btn"
+                                data-column-id="randomWorldNewsColumn">View Archive</button>
+                        </div>
+                    </div>
+                    <div class="news-column" data-column-id="localEventsColumn" id="localEventsColumn">
+                        <h4>Local Dispatches & Bounties</h4>
+                        <div class="news-feed-column" id="localEventsFeed">
+                            <div class="news-item"><em>The local notice board is currently empty...</em></div>
+                        </div>
+                        <div class="archive-controls">
+                            <button class="steampunk-button view-archive-btn" data-column-id="localEventsColumn">View
+                                Archive</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="user-panel steampunk-border" id="userPanel">
+        <div id="userPanelContent"></div>
+        <button class="steampunk-button w-full bg-red-700 hover:bg-red-600 border-red-900 mt-4" id="logoutBtn"
+            style="display: none;">Logout</button>
+    </div>
+    <div class="login-modal" id="loginModal">
+        <div class="login-form steampunk-border relative">
+            <button class="absolute top-2 right-3 text-amber-100 hover:text-amber-300 text-2xl" id="closeLoginModalBtn">
+                <span class="material-icons">close</span>
+            </button>
+            <h3 class="text-2xl font-steampunk-title mb-6 text-center text-amber-300">Secure Access</h3>
+            <div class="mb-4">
+                <label class="block mb-1 text-amber-100" for="usernameInput">Operator ID / Player Name:</label>
+                <input id="usernameInput" placeholder="Enter your designation" type="text" />
+            </div>
+            <div class="mb-6">
+                <label class="block mb-1 text-amber-100" for="passwordInput">Password:</label>
+                <input id="passwordInput" placeholder="Enter access code" type="password" />
+            </div>
+            <button class="steampunk-button w-full" id="loginBtn">Authenticate</button>
+        </div>
+    </div>
+    <div class="news-modal" id="newsEditModal">
+        <div class="news-modal-content steampunk-border">
+            <button class="absolute top-3 right-4 text-amber-100 hover:text-amber-300 text-3xl"
+                id="closeNewsEditModalBtn">
+                <span class="material-icons">close</span>
+            </button>
+            <h3 class="text-2xl font-steampunk-title mb-6 text-center text-amber-300">Edit News Dispatch</h3>
+            <input id="editNewsItemId" type="hidden" />
+            <input id="editNewsColumnId" type="hidden" />
+            <div class="mb-4">
+                <label class="block mb-1 text-amber-100" for="editNewsTitleInput">Headline (Optional):</label>
+                <input id="editNewsTitleInput" placeholder="e.g., Urgent Bulletin!" type="text" />
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 text-amber-100" for="editNewsContentInput">Content:</label>
+                <textarea id="editNewsContentInput" placeholder="Details of the dispatch..." rows="3"></textarea>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 text-amber-100" for="editNewsTargetFeed">Move to Column:</label>
+                <select id="editNewsTargetFeed">
+                    <option value="playerNewsColumn">Heroes' Herald</option>
+                    <option value="worldNewsColumn">World Stage</option>
+                    <option value="territoryNewsColumn">Regional Reports</option>
+                    <option value="randomWorldNewsColumn">Whispers on the Wind</option>
+                    <option value="localEventsColumn">Local Dispatches</option>
+                </select>
+            </div>
+            <button class="steampunk-button w-full" id="saveNewsEditBtn">Save Changes</button>
+        </div>
+    </div>
+    <div class="news-modal" id="newsArchiveModal">
+        <div class="news-modal-content steampunk-border">
+            <button class="absolute top-3 right-4 text-amber-100 hover:text-amber-300 text-3xl"
+                id="closeNewsArchiveModalBtn">
+                <span class="material-icons">close</span>
+            </button>
+            <h3 class="text-2xl font-steampunk-title mb-6 text-center text-amber-300" id="archiveModalTitle">News
+                Archive</h3>
+            <div class="max-h-96 overflow-y-auto pr-2" id="archiveFeed">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Глобальные переменные и константы ---
+        const magicCrystalFill = document.getElementById('magicCrystalFill');
+        const magicValueDisplay = document.getElementById('magicValueDisplay');
+        const pressureGaugeArrow = document.getElementById('pressureGaugeArrow');
+        const pressureValueDisplay = document.getElementById('pressureValueDisplay');
+        const darknessBarometerFill = document.getElementById('darknessBarometerFill');
+        const darknessValueDisplay = document.getElementById('darknessValueDisplay');
+        const newsFeeds = { playerNewsFeed: document.getElementById('playerNewsFeed'), worldNewsFeed: document.getElementById('worldNewsFeed'), territoryNewsFeed: document.getElementById('territoryNewsFeed'), randomWorldNewsFeed: document.getElementById('randomWorldNewsFeed'), localEventsFeed: document.getElementById('localEventsFeed') };
+        const newsColumns = { playerNewsColumn: document.getElementById('playerNewsColumn'), worldNewsColumn: document.getElementById('worldNewsColumn'), territoryNewsColumn: document.getElementById('territoryNewsColumn'), randomWorldNewsColumn: document.getElementById('randomWorldNewsColumn'), localEventsColumn: document.getElementById('localEventsColumn') };
+        const userPanel = document.getElementById('userPanel');
+        const userPanelContent = document.getElementById('userPanelContent');
+        const toggleUserPanelBtn = document.getElementById('toggleUserPanelBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginModal = document.getElementById('loginModal');
+        const loginBtn = document.getElementById('loginBtn');
+        const closeLoginModalBtn = document.getElementById('closeLoginModalBtn');
+        const passwordInput = document.getElementById('passwordInput');
+        const usernameInput = document.getElementById('usernameInput');
+        const mainContent = document.getElementById('mainContent');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const interactiveMapContainer = document.getElementById('interactiveMapContainer');
+        const interactiveMapContent = document.getElementById('interactiveMapContent');
+        const newsPanel = document.getElementById('newsPanel');
+        const toggleNewsBtn = document.getElementById('toggleNewsBtn');
+        const newsPanelHeader = document.getElementById('newsPanelHeader');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const resetMapBtn = document.getElementById('resetMapBtn');
+        const newsEditModal = document.getElementById('newsEditModal');
+        const closeNewsEditModalBtn = document.getElementById('closeNewsEditModalBtn');
+        const saveNewsEditBtn = document.getElementById('saveNewsEditBtn');
+        const editNewsItemIdInput = document.getElementById('editNewsItemId');
+        const editNewsColumnIdInput = document.getElementById('editNewsColumnId');
+        const editNewsTitleInput = document.getElementById('editNewsTitleInput');
+        const editNewsContentInput = document.getElementById('editNewsContentInput');
+        const editNewsTargetFeedSelect = document.getElementById('editNewsTargetFeed');
+        const newsArchiveModal = document.getElementById('newsArchiveModal');
+        const closeNewsArchiveModalBtn = document.getElementById('closeNewsArchiveModalBtn');
+        const archiveModalTitle = document.getElementById('archiveModalTitle');
+        const archiveFeed = document.getElementById('archiveFeed');
+        const mapPlaceholder = document.getElementById('mapPlaceholder');
+
+        let magicLevel = 0, pressureLevel = 0, darknessLevel = 0;
+        let currentUser = null;
+        let mapScale = 1, mapPosX = 0, mapPosY = 0, isPanning = false, lastPanX, lastPanY;
+        const minScale = 0.5, maxScale = 3, zoomSensitivity = 0.1;
+        let newsData = {}, newsArchive = {};
+        let markerBeingDragged = null, dragOffsetX = 0, dragOffsetY = 0;
+
+        const diceRollerPanel = document.getElementById('diceRollerPanel');
+        const toggleDicePanelBtn = document.getElementById('toggleDicePanelBtn');
+        const diceFormulaInput = document.getElementById('diceFormulaInput');
+        const rollDiceFormulaBtn = document.getElementById('rollDiceFormulaBtn');
+        const clearDiceHistoryBtn = document.getElementById('clearDiceHistoryBtn');
+        const diceResultDisplay = document.getElementById('diceResultDisplay');
+        const diceHistoryDisplay = document.getElementById('diceHistory');
+        let diceRollHistory = [];
+        const MAX_HISTORY_LENGTH = 5;
+
+        const fireflyContainers = document.querySelectorAll('.firefly-bg-element');
+        const NUM_FIREFLIES_PER_CONTAINER = 3;
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const bodyElement = document.body;
+        let isNightMode = localStorage.getItem('steampunkTheme') === 'true';
+
+        let mapCollection = [];
+        let currentMapIndex = 0;
+        const currentMapNameDisplay = document.getElementById('currentMapNameDisplay');
+        const prevMapBtn = document.getElementById('prevMapBtn');
+        const nextMapBtn = document.getElementById('nextMapBtn');
+        const deleteMapBtn = document.getElementById('deleteMapBtn');
+        const mapImageInput = document.getElementById('mapImageInput');
+        const uploadNewMapBtn = document.getElementById('uploadNewMapBtn');
+        const replaceMapImageBtn = document.getElementById('replaceMapImageBtn');
+        const renameMapBtn = document.getElementById('renameMapBtn');
+        let mapImageUploadAction = 'new';
+        const decorativeElements = document.querySelectorAll('.decorative-element');
+
+        function getDefaultMap() { return { id: `map_${Date.now()}_default`, name: "Aethelburg Region", imageSrc: null, markers: [] }; }
+        function loadMapDataFromLocalStorage() { const storedMapCollection = localStorage.getItem('steampunkMapCollection'); if (storedMapCollection) { try { mapCollection = JSON.parse(storedMapCollection); } catch (e) { mapCollection = []; } } else { mapCollection = []; } if (mapCollection.length === 0) { mapCollection = [getDefaultMap()]; currentMapIndex = 0; saveMapDataToLocalStorage(); } const storedMapIndex = localStorage.getItem('steampunkCurrentMapIndex'); currentMapIndex = (storedMapIndex !== null && mapCollection[parseInt(storedMapIndex)]) ? parseInt(storedMapIndex) : 0; if (currentMapIndex >= mapCollection.length && mapCollection.length > 0) currentMapIndex = 0; renderCurrentMap(); }
+        function saveMapDataToLocalStorage() { try { const collectionToSave = mapCollection.map(map => { if (map.id !== getDefaultMap().id && map.imageSrc && map.imageSrc.startsWith('data:image') && map.imageSrc.length > 1024 * 100) { return { ...map, imageSrc: `placeholder_for_${map.originalFileName || 'large_image'}` }; } return map; }); localStorage.setItem('steampunkMapCollection', JSON.stringify(collectionToSave)); localStorage.setItem('steampunkCurrentMapIndex', currentMapIndex.toString()); } catch (e) { /* alert("Could not save map data..."); */ } }
+        function renderCurrentMap() { if (!interactiveMapContent || !currentMapNameDisplay) { return; } if (mapCollection.length === 0) { currentMapNameDisplay.textContent = "No Maps Available"; interactiveMapContent.style.backgroundImage = 'none'; if (mapPlaceholder) mapPlaceholder.style.display = 'flex'; renderMapMarkers([]); updateMapNavButtons(); if (typeof renderAdminMarkerList === 'function') renderAdminMarkerList(); return; } const map = mapCollection[currentMapIndex]; if (!map) { currentMapIndex = 0; if (mapCollection.length > 0) renderCurrentMap(); else { currentMapNameDisplay.textContent = "Error: No map"; interactiveMapContent.style.backgroundImage = 'none'; renderMapMarkers([]); } updateMapNavButtons(); if (typeof renderAdminMarkerList === 'function') renderAdminMarkerList(); return; } if (map.imageSrc && !map.imageSrc.startsWith('placeholder_for_')) { interactiveMapContent.style.backgroundImage = `url(${map.imageSrc})`; if (mapPlaceholder) mapPlaceholder.style.display = 'none'; } else { interactiveMapContent.style.backgroundImage = 'none'; if (mapPlaceholder) mapPlaceholder.style.display = 'flex'; } currentMapNameDisplay.textContent = map.name; resetMapTransformAndSize(() => { renderMapMarkers(map.markers || []); if (mapPlaceholder) { if ((map.markers && map.markers.length > 0) || (map.imageSrc && !map.imageSrc.startsWith('placeholder_for_'))) mapPlaceholder.style.display = 'none'; else mapPlaceholder.style.display = 'flex'; } }); updateMapNavButtons(); if (typeof populateAdminPanel === 'function' && currentUser && currentUser.type === 'admin') populateAdminPanel(); else if (typeof renderAdminMarkerList === 'function') renderAdminMarkerList(); }
+        function updateMapNavButtons() { if (prevMapBtn) prevMapBtn.disabled = mapCollection.length <= 1 || currentMapIndex === 0; if (nextMapBtn) nextMapBtn.disabled = mapCollection.length <= 1 || currentMapIndex >= mapCollection.length - 1; if (deleteMapBtn) deleteMapBtn.disabled = mapCollection.length <= 1; if (renameMapBtn) renameMapBtn.disabled = mapCollection.length === 0; if (replaceMapImageBtn) replaceMapImageBtn.disabled = mapCollection.length === 0; }
+        if (prevMapBtn) prevMapBtn.addEventListener('click', () => { if (currentMapIndex > 0) { currentMapIndex--; renderCurrentMap(); saveMapDataToLocalStorage(); } });
+        if (nextMapBtn) nextMapBtn.addEventListener('click', () => { if (currentMapIndex < mapCollection.length - 1) { currentMapIndex++; renderCurrentMap(); saveMapDataToLocalStorage(); } });
+        if (uploadNewMapBtn && mapImageInput) uploadNewMapBtn.addEventListener('click', () => { mapImageUploadAction = 'new'; mapImageInput.value = null; mapImageInput.click(); });
+        if (replaceMapImageBtn && mapImageInput) replaceMapImageBtn.addEventListener('click', () => { if (mapCollection.length === 0) return; mapImageUploadAction = 'replace'; mapImageInput.value = null; mapImageInput.click(); });
+        if (mapImageInput) mapImageInput.addEventListener('change', (event) => { const file = event.target.files[0]; if (file && interactiveMapContent) { const reader = new FileReader(); reader.onload = (e) => { const imageSrcDataUrl = e.target.result; if (mapImageUploadAction === 'new') { const newMap = { id: `map_${Date.now()}_${file.name.split('.')[0].replace(/\s+/g, '_')}`, name: file.name.split('.')[0] || "Uploaded Map", imageSrc: imageSrcDataUrl, markers: [], originalFileName: file.name }; mapCollection.push(newMap); currentMapIndex = mapCollection.length - 1; } else if (mapImageUploadAction === 'replace' && mapCollection[currentMapIndex]) { mapCollection[currentMapIndex].imageSrc = imageSrcDataUrl; mapCollection[currentMapIndex].originalFileName = file.name; } renderCurrentMap(); saveMapDataToLocalStorage(); }; reader.readAsDataURL(file); } });
+        if (renameMapBtn) renameMapBtn.addEventListener('click', () => { if (mapCollection.length === 0 || !mapCollection[currentMapIndex]) return; const currentName = mapCollection[currentMapIndex].name; const newName = prompt("Enter new name for the map:", currentName); if (newName && newName.trim() !== "" && newName.trim() !== currentName) { mapCollection[currentMapIndex].name = newName.trim(); renderCurrentMap(); saveMapDataToLocalStorage(); } });
+        if (deleteMapBtn) deleteMapBtn.addEventListener('click', () => { if (mapCollection.length <= 1) { alert("Cannot delete the last map."); return; } if (confirm(`Are you sure you want to delete the map "${mapCollection[currentMapIndex].name}"? This action cannot be undone.`)) { mapCollection.splice(currentMapIndex, 1); if (currentMapIndex >= mapCollection.length && mapCollection.length > 0) currentMapIndex = mapCollection.length - 1; else if (mapCollection.length === 0) { mapCollection.push(getDefaultMap()); currentMapIndex = 0; } renderCurrentMap(); saveMapDataToLocalStorage(); } });
+        function handleMarkerDragMove(e) { if (!markerBeingDragged || !interactiveMapContainer || !interactiveMapContent) return; const mapContainerRect = interactiveMapContainer.getBoundingClientRect(); const mapContentRect = interactiveMapContent.getBoundingClientRect(); const originalMapWidth = mapContentRect.width / mapScale; const originalMapHeight = mapContentRect.height / mapScale; const currentMouseScreenX = e.clientX - mapContainerRect.left; const currentMouseScreenY = e.clientY - mapContainerRect.top; const currentMouseMapX = (currentMouseScreenX - mapPosX) / mapScale; const currentMouseMapY = (currentMouseScreenY - mapPosY) / mapScale; let newMarkerMapX = currentMouseMapX - dragOffsetX; let newMarkerMapY = currentMouseMapY - dragOffsetY; markerBeingDragged.x = (newMarkerMapX / originalMapWidth) * 100; markerBeingDragged.y = (newMarkerMapY / originalMapHeight) * 100; markerBeingDragged.x = Math.max(0, Math.min(100, markerBeingDragged.x)); markerBeingDragged.y = Math.max(0, Math.min(100, markerBeingDragged.y)); const markerEl = interactiveMapContent.querySelector(`.map-marker[data-id="${markerBeingDragged.id}"]`); if (markerEl) { markerEl.style.left = `${markerBeingDragged.x}%`; markerEl.style.top = `${markerBeingDragged.y}%`; } }
+        function handleMarkerDragUp() { if (!markerBeingDragged || !interactiveMapContent) return; const markerEl = interactiveMapContent.querySelector(`.map-marker[data-id="${markerBeingDragged.id}"]`); if (markerEl) markerEl.style.cursor = 'grab'; const map = mapCollection[currentMapIndex]; if (map && map.markers) { const markerIndex = map.markers.findIndex(m => m.id === markerBeingDragged.id); if (markerIndex !== -1) { map.markers[markerIndex].x = markerBeingDragged.x; map.markers[markerIndex].y = markerBeingDragged.y; } } saveMapDataToLocalStorage(); if (typeof renderAdminMarkerList === 'function') renderAdminMarkerList(); markerBeingDragged = null; document.removeEventListener('mousemove', handleMarkerDragMove); document.removeEventListener('mouseup', handleMarkerDragUp); document.removeEventListener('mouseleave', handleMarkerDragUp); }
+        function updateMagicDisplay(value) { magicLevel = Math.max(0, Math.min(100, value)); if (magicCrystalFill) magicCrystalFill.style.height = `${magicLevel}%`; if (magicValueDisplay) magicValueDisplay.textContent = magicLevel; const container = magicCrystalFill ? magicCrystalFill.closest(".crystal-container") : null; if (!container) return; container.classList.remove('stage-closed', 'stage-glow', 'stage-critical', 'stage-overloaded'); if (magicLevel === 0) { container.classList.add('stage-closed'); if (window.steampunkPlayer) window.steampunkPlayer.triggerNormalMode('magic'); } else if (magicLevel >= 99) { container.classList.add('stage-overloaded'); if (window.steampunkPlayer) window.steampunkPlayer.triggerCriticalMode('magic'); } else if (magicLevel > 90) { container.classList.add('stage-critical'); if (window.steampunkPlayer) window.steampunkPlayer.triggerCriticalMode('magic'); } else if (magicLevel >= 80) { container.classList.add('stage-glow'); if (window.steampunkPlayer) window.steampunkPlayer.triggerNormalMode('magic'); } else { if (window.steampunkPlayer) window.steampunkPlayer.triggerNormalMode('magic'); } if (currentUser && currentUser.type === 'admin' && document.getElementById('magicInputAdmin')) document.getElementById('magicInputAdmin').value = magicLevel; }
+        function updatePressureDisplay(value) { pressureLevel = Math.max(0, Math.min(100, value)); const rotation = (pressureLevel / 100) * 180 - 90; if (pressureGaugeArrow) pressureGaugeArrow.style.transform = `translateX(-50%) rotate(${rotation}deg)`; if (pressureValueDisplay) pressureValueDisplay.textContent = pressureLevel; const gaugeContainerEl = pressureGaugeArrow ? pressureGaugeArrow.closest(".gauge-container") : null; if (!gaugeContainerEl) return; gaugeContainerEl.classList.remove('stage-closed', 'stage-glow', 'stage-critical', 'stage-overloaded'); if (pressureLevel === 0) { gaugeContainerEl.classList.add('stage-closed'); if (window.steampunkPlayer) window.steampunkPlayer.triggerNormalMode('pressure'); } else if (pressureLevel >= 99) { gaugeContainerEl.classList.add('stage-overloaded'); if (window.steampunkPlayer) window.steampunkPlayer.triggerCriticalMode('pressure'); } else if (pressureLevel > 90) { gaugeContainerEl.classList.add('stage-critical'); if (window.steampunkPlayer) window.steampunkPlayer.triggerCriticalMode('pressure'); } else if (pressureLevel >= 80) { gaugeContainerEl.classList.add('stage-glow'); if (window.steampunkPlayer) window.steampunkPlayer.triggerNormalMode('pressure'); } else { if (window.steampunkPlayer) window.steampunkPlayer.triggerNormalMode('pressure'); } if (currentUser && currentUser.type === 'admin' && document.getElementById('pressureInputAdmin')) document.getElementById('pressureInputAdmin').value = pressureLevel; }
+        function updateDarknessDisplay(value) { darknessLevel = Math.max(0, Math.min(100, value)); const barometerContainerEl = darknessBarometerFill ? darknessBarometerFill.closest(".barometer-container") : null; if (darknessBarometerFill) darknessBarometerFill.style.height = `${darknessLevel}%`; if (darknessValueDisplay) darknessValueDisplay.textContent = darknessLevel; if (!barometerContainerEl) return; barometerContainerEl.classList.remove('stage-glow', 'stage-critical', 'stage-overloaded'); if (darknessLevel >= 99) { barometerContainerEl.classList.add('stage-overloaded'); if (window.steampunkPlayer) window.steampunkPlayer.triggerCriticalMode('darkness'); } else if (darknessLevel > 90) { barometerContainerEl.classList.add('stage-critical'); if (window.steampunkPlayer) window.steampunkPlayer.triggerCriticalMode('darkness'); } else if (darknessLevel >= 80) { barometerContainerEl.classList.add('stage-glow'); if (window.steampunkPlayer) window.steampunkPlayer.triggerNormalMode('darkness'); } else { if (window.steampunkPlayer) window.steampunkPlayer.triggerNormalMode('darkness'); } if (currentUser && currentUser.type === 'admin' && document.getElementById('darknessInputAdmin')) document.getElementById('darknessInputAdmin').value = darknessLevel; }
+        function applyMapTransform() { if (interactiveMapContent) interactiveMapContent.style.transform = `translate(${mapPosX}px, ${mapPosY}px) scale(${mapScale})`; }
+        if (interactiveMapContent) { interactiveMapContent.addEventListener('dblclick', (e) => { if (!currentUser || currentUser.type !== 'admin' || e.target.closest('.map-marker') || e.target.closest('.map-controls') || !interactiveMapContent) return; const rect = interactiveMapContent.getBoundingClientRect(); const clickX_content = e.clientX - rect.left; const clickY_content = e.clientY - rect.top; const xPercent = ((clickX_content - mapPosX) / mapScale / interactiveMapContent.offsetWidth) * 100; const yPercent = ((clickY_content - mapPosY) / mapScale / interactiveMapContent.offsetHeight) * 100; const finalX = Math.max(0, Math.min(100, xPercent)); const finalY = Math.max(0, Math.min(100, yPercent)); openEditMarkerModal(null, finalX, finalY); }); }
+        function renderMapMarkers(markersToRender = []) { if (!interactiveMapContent) return; const currentMarkerElements = Array.from(interactiveMapContent.querySelectorAll('.map-marker')); currentMarkerElements.forEach(m => m.remove()); markersToRender.forEach(marker => { const markerEl = document.createElement('div'); markerEl.classList.add('map-marker'); markerEl.style.position = 'absolute'; markerEl.style.width = '24px'; markerEl.style.height = '24px'; markerEl.style.transform = 'translate(-50%, -50%)'; markerEl.style.left = `${marker.x}%`; markerEl.style.top = `${marker.y}%`; markerEl.style.borderRadius = '50%'; markerEl.style.border = '2px solid white'; markerEl.style.display = 'flex'; markerEl.style.alignItems = 'center'; markerEl.style.justifyContent = 'center'; markerEl.style.fontSize = '12px'; markerEl.style.color = 'white'; markerEl.style.boxShadow = '0 0 5px black'; markerEl.style.userSelect = 'none'; markerEl.style.zIndex = '20'; markerEl.dataset.id = marker.id; markerEl.style.backgroundColor = marker.color.includes('#') ? marker.color : ''; if (!marker.color.includes('#')) markerEl.classList.add(`bg-${marker.color}`); const icon = document.createElement('span'); icon.classList.add('material-icons'); icon.textContent = marker.icon || 'place'; markerEl.appendChild(icon); const tooltip = document.createElement('div'); tooltip.classList.add('map-marker-tooltip'); tooltip.textContent = marker.name; markerEl.appendChild(tooltip); if (currentUser && currentUser.type === 'admin') { markerEl.style.cursor = 'grab'; markerEl.addEventListener('dblclick', (e) => { e.stopPropagation(); openEditMarkerModal(marker.id); }); markerEl.addEventListener('mousedown', (e) => { if (e.button !== 0 || !interactiveMapContainer || !interactiveMapContent) return; e.stopPropagation(); markerEl.style.cursor = 'grabbing'; markerBeingDragged = marker; const mapContainerRect = interactiveMapContainer.getBoundingClientRect(); const mapContentRect = interactiveMapContent.getBoundingClientRect(); const originalMapWidth = mapContentRect.width / mapScale; const originalMapHeight = mapContentRect.height / mapScale; const clickMapX = (e.clientX - mapContainerRect.left - mapPosX) / mapScale; const clickMapY = (e.clientY - mapContainerRect.top - mapPosY) / mapScale; const currentMarkerMapX = (markerBeingDragged.x / 100) * originalMapWidth; const currentMarkerMapY = (markerBeingDragged.y / 100) * originalMapHeight; dragOffsetX = clickMapX - currentMarkerMapX; dragOffsetY = clickMapY - currentMarkerMapY; document.addEventListener('mousemove', handleMarkerDragMove); document.addEventListener('mouseup', handleMarkerDragUp); document.addEventListener('mouseleave', handleMarkerDragUp); }); } interactiveMapContent.appendChild(markerEl); }); }
+        function handleMapMouseDown(e) { if (!interactiveMapContainer || e.target.closest('.map-marker')) return; if (e.button !== 0) return; isPanning = true; interactiveMapContainer.classList.add('grabbing'); lastPanX = e.clientX; lastPanY = e.clientY; document.addEventListener('mousemove', handleMapMouseMove); document.addEventListener('mouseup', handleMapMouseUp); document.addEventListener('mouseleave', handleMapMouseUp); }
+        function handleMapMouseMove(e) { if (!isPanning) return; const dx = e.clientX - lastPanX; const dy = e.clientY - lastPanY; mapPosX += dx; mapPosY += dy; lastPanX = e.clientX; lastPanY = e.clientY; applyMapTransform(); }
+        function handleMapMouseUp() { if (!isPanning) return; isPanning = false; if (interactiveMapContainer) interactiveMapContainer.classList.remove('grabbing'); document.removeEventListener('mousemove', handleMapMouseMove); document.removeEventListener('mouseup', handleMapMouseUp); document.removeEventListener('mouseleave', handleMapMouseUp); }
+        function handleMapWheel(e) { if (!interactiveMapContainer) return; e.preventDefault(); const rect = interactiveMapContainer.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top; const mouseMapX = (mouseX - mapPosX) / mapScale; const mouseMapY = (mouseY - mapPosY) / mapScale; const delta = e.deltaY > 0 ? -zoomSensitivity : zoomSensitivity; const newScale = Math.max(minScale, Math.min(maxScale, mapScale * (1 + delta))); mapPosX = mouseX - mouseMapX * newScale; mapPosY = mouseY - mouseMapY * newScale; mapScale = newScale; applyMapTransform(); }
+        if (zoomInBtn) zoomInBtn.addEventListener('click', () => { if (!interactiveMapContainer) return; const rect = interactiveMapContainer.getBoundingClientRect(); const centerX = rect.width / 2; const centerY = rect.height / 2; const centerMapX = (centerX - mapPosX) / mapScale; const centerMapY = (centerY - mapPosY) / mapScale; mapScale = Math.min(maxScale, mapScale * (1 + zoomSensitivity * 2)); mapPosX = centerX - centerMapX * mapScale; mapPosY = centerY - centerMapY * mapScale; applyMapTransform(); });
+        if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => { if (!interactiveMapContainer) return; const rect = interactiveMapContainer.getBoundingClientRect(); const centerX = rect.width / 2; const centerY = rect.height / 2; const centerMapX = (centerX - mapPosX) / mapScale; const centerMapY = (centerY - mapPosY) / mapScale; mapScale = Math.max(minScale, mapScale / (1 + zoomSensitivity * 2)); mapPosX = centerX - centerMapX * mapScale; mapPosY = centerY - centerMapY * mapScale; applyMapTransform(); });
+        if (resetMapBtn) resetMapBtn.addEventListener('click', () => { mapScale = 1; mapPosX = 0; mapPosY = 0; applyMapTransform(); });
+        if (interactiveMapContainer) { interactiveMapContainer.addEventListener('mousedown', handleMapMouseDown); interactiveMapContainer.addEventListener('wheel', handleMapWheel, { passive: false }); }
+        function generateNewsItemId() { return `news_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`; }
+        function renderNewsColumn(columnId) { const feedElement = newsFeeds[columnId.replace('Column', 'Feed')]; if (!feedElement) return; feedElement.innerHTML = ''; const items = newsData[columnId] || []; if (items.length === 0 && Object.keys(newsFeeds).includes(columnId.replace('Column', 'Feed'))) { const placeholder = document.createElement('div'); placeholder.classList.add('news-item'); placeholder.innerHTML = '<em>Awaiting dispatches...</em>'; feedElement.appendChild(placeholder); return; } items.forEach(item => { const newsItemEl = document.createElement('div'); newsItemEl.classList.add('news-item'); newsItemEl.dataset.itemId = item.id; newsItemEl.dataset.columnId = columnId; let htmlContent = `<span class="text-amber-400">${item.timestamp}:</span> `; if (item.title) htmlContent += `<strong>${item.title}:</strong> `; htmlContent += item.content; if (item.isSystem) newsItemEl.classList.add('italic', 'text-gray-400'); newsItemEl.innerHTML = htmlContent; if (currentUser && currentUser.type === 'admin') { const actionsDiv = document.createElement('div'); actionsDiv.classList.add('news-item-actions'); actionsDiv.innerHTML = `<button class="news-item-btn" title="Edit"><span class="material-icons">edit</span></button> <button class="news-item-btn" title="Delete"><span class="material-icons">delete</span></button> <button class="news-item-btn" title="Archive"><span class="material-icons">archive</span></button>`; actionsDiv.querySelector('[title="Edit"]').addEventListener('click', (e) => { e.stopPropagation(); openEditNewsModal(item.id, columnId); }); actionsDiv.querySelector('[title="Delete"]').addEventListener('click', (e) => { e.stopPropagation(); deleteNewsItem(item.id, columnId); }); actionsDiv.querySelector('[title="Archive"]').addEventListener('click', (e) => { e.stopPropagation(); archiveNewsItem(item.id, columnId); }); newsItemEl.appendChild(actionsDiv); } feedElement.appendChild(newsItemEl); }); }
+        function addNewsToFeed(targetColumnId, title, content, isSystem = false, maxItems = 10) { if (!newsData[targetColumnId] && Object.keys(newsColumns).includes(targetColumnId)) newsData[targetColumnId] = []; else if (!Object.keys(newsColumns).includes(targetColumnId)) return; const newItem = { id: generateNewsItemId(), title: title, content: content, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), isSystem: isSystem }; newsData[targetColumnId].unshift(newItem); if (newsData[targetColumnId].length > maxItems) newsData[targetColumnId].pop(); renderNewsColumn(targetColumnId); saveNewsToLocalStorage(); }
+        function openLoginModal() { if (loginModal) loginModal.classList.add('open'); if (mainContent) mainContent.classList.add('blur'); if (passwordInput) passwordInput.focus(); }
+        function closeLoginModal() { if (loginModal) loginModal.classList.remove('open'); if (mainContent) mainContent.classList.remove('blur'); }
+        function openUserPanel() { if (userPanel) userPanel.classList.add('open'); if (logoutBtn) logoutBtn.style.display = 'block'; if (toggleUserPanelBtn) { toggleUserPanelBtn.classList.add('minimized'); toggleUserPanelBtn.title = "Close Panel"; } }
+        function closeUserPanel() { if (userPanel) userPanel.classList.remove('open'); if (!currentUser && logoutBtn) logoutBtn.style.display = 'none'; if (toggleUserPanelBtn) { toggleUserPanelBtn.classList.remove('minimized'); toggleUserPanelBtn.title = "Access Portal"; } }
+        function populateAdminPanel() { if (!userPanelContent || mapCollection.length === 0) return; const currentMap = mapCollection[currentMapIndex]; const mapName = currentMap ? currentMap.name : 'N/A'; userPanelContent.innerHTML = `<h3 class="text-xl font-steampunk-title mb-4 text-amber-300">Administrator Console</h3> <div class="mb-4"> <label class="block mb-1 text-amber-100" for="magicInputAdmin">Set Magic Level (0-100):</label> <input id="magicInputAdmin" max="100" min="0" type="number" value="${magicLevel}"/> </div> <div class="mb-4"> <label class="block mb-1 text-amber-100" for="pressureInputAdmin">Set Pressure Level (0-100):</label> <input id="pressureInputAdmin" max="100" min="0" type="number" value="${pressureLevel}"/> </div> <div class="mb-4"> <label class="block mb-1 text-amber-100" for="darknessInputAdmin">Set Darkness Level (0-100):</label> <input id="darknessInputAdmin" max="100" min="0" type="number" value="${darknessLevel}"/> </div> <button class="steampunk-button w-full mb-3" id="applyAdminValuesBtn">Apply World Changes</button> <hr class="border-amber-700 my-4"> <h4 class="text-lg font-steampunk-title mb-2 text-amber-200">Map Markers (Current Map: ${mapName})</h4> <button class="steampunk-button w-full mb-3" id="addMarkerBtn">Add New Map Marker</button> <div id="markerListAdmin" class="max-h-48 overflow-y-auto mb-3 pr-2"></div> <hr class="border-amber-700 my-4"> <h4 class="text-lg font-steampunk-title mb-2 text-amber-200">Publish Dispatch</h4> <div class="mb-4"> <label class="block mb-1 text-amber-100" for="generalNewsTitleInput">Dispatch Headline (Optional):</label> <input id="generalNewsTitleInput" type="text" placeholder="e.g., Urgent Bulletin!"/> </div> <div class="mb-4"> <label class="block mb-1 text-amber-100" for="generalNewsContentInput">Dispatch Content:</label> <textarea id="generalNewsContentInput" rows="2" placeholder="Details of the new dispatch..."></textarea> </div> <div class="mb-4"> <label class="block mb-1 text-amber-100" for="dispatchTargetFeed">Target Column:</label> <select id="dispatchTargetFeed"> <option value="playerNewsColumn">Heroes' Herald</option> <option value="worldNewsColumn">World Stage</option> <option value="territoryNewsColumn">Regional Reports</option> <option value="randomWorldNewsColumn">Whispers on the Wind</option> <option value="localEventsColumn">Local Dispatches</option></select> </div> <button class="steampunk-button w-full" id="publishGeneralNewsBtn">Publish General Dispatch</button>`; renderAdminMarkerList(); const applyBtn = document.getElementById('applyAdminValuesBtn'); if (applyBtn) applyBtn.addEventListener('click', () => { const newMagic = parseInt(document.getElementById('magicInputAdmin').value); const newPressure = parseInt(document.getElementById('pressureInputAdmin').value); const newDarkness = parseInt(document.getElementById('darknessInputAdmin').value); updateMagicDisplay(newMagic); updatePressureDisplay(newPressure); updateDarknessDisplay(newDarkness); addNewsToFeed('worldNewsColumn', 'World Edict', `State manually adjusted - Magic ${newMagic}%, Pressure ${newPressure}%, Darkness ${newDarkness}%.`, true); }); const addMarkerButton = document.getElementById('addMarkerBtn'); if (addMarkerButton) addMarkerButton.addEventListener('click', () => openEditMarkerModal()); const publishBtn = document.getElementById('publishGeneralNewsBtn'); if (publishBtn) publishBtn.addEventListener('click', () => { const title = document.getElementById('generalNewsTitleInput').value.trim(); const content = document.getElementById('generalNewsContentInput').value.trim(); const targetColumnId = document.getElementById('dispatchTargetFeed').value; if (content && targetColumnId) { addNewsToFeed(targetColumnId, title, content); document.getElementById('generalNewsTitleInput').value = ''; document.getElementById('generalNewsContentInput').value = ''; } else if (!content) alert("Dispatch content cannot be empty."); else alert("Invalid target column selected."); }); }
+        function openEditNewsModal(itemId, columnId) { if (!newsData[columnId] || !editNewsItemIdInput || !editNewsColumnIdInput || !editNewsTitleInput || !editNewsContentInput || !editNewsTargetFeedSelect || !newsEditModal || !mainContent) return; const item = newsData[columnId]?.find(news => news.id === itemId); if (!item) return; editNewsItemIdInput.value = itemId; editNewsColumnIdInput.value = columnId; editNewsTitleInput.value = item.title || ''; editNewsContentInput.value = item.content; editNewsTargetFeedSelect.value = columnId; newsEditModal.classList.add('open'); mainContent.classList.add('blur'); }
+        if (closeNewsEditModalBtn) closeNewsEditModalBtn.addEventListener('click', () => { if (newsEditModal) newsEditModal.classList.remove('open'); if (mainContent) mainContent.classList.remove('blur'); });
+        if (newsEditModal) newsEditModal.addEventListener('click', (event) => { if (event.target === newsEditModal) { newsEditModal.classList.remove('open'); if (mainContent) mainContent.classList.remove('blur'); } });
+        if (saveNewsEditBtn) saveNewsEditBtn.addEventListener('click', () => { if (!editNewsItemIdInput || !editNewsColumnIdInput || !editNewsTitleInput || !editNewsContentInput || !editNewsTargetFeedSelect || !newsEditModal || !mainContent) return; const itemId = editNewsItemIdInput.value; const originalColumnId = editNewsColumnIdInput.value; const newTitle = editNewsTitleInput.value.trim(); const newContent = editNewsContentInput.value.trim(); const newColumnId = editNewsTargetFeedSelect.value; if (!newContent) { alert('News content cannot be empty.'); return; } if (!newsData[originalColumnId]) return; const itemIndex = newsData[originalColumnId].findIndex(news => news.id === itemId); if (itemIndex === -1) return; const itemToUpdate = { ...newsData[originalColumnId][itemIndex], title: newTitle, content: newContent }; if (originalColumnId !== newColumnId) { newsData[originalColumnId].splice(itemIndex, 1); if (!newsData[newColumnId]) newsData[newColumnId] = []; newsData[newColumnId].unshift(itemToUpdate); renderNewsColumn(originalColumnId); } else { newsData[originalColumnId][itemIndex] = itemToUpdate; } renderNewsColumn(newColumnId); saveNewsToLocalStorage(); newsEditModal.classList.remove('open'); mainContent.classList.remove('blur'); });
+        function deleteNewsItem(itemId, columnId) { if (!newsData[columnId]) return; const itemIndex = newsData[columnId].findIndex(news => news.id === itemId); if (itemIndex > -1) { if (confirm('Are you sure you want to delete this news item? This cannot be undone.')) { newsData[columnId].splice(itemIndex, 1); renderNewsColumn(columnId); saveNewsToLocalStorage(); } } }
+        function archiveNewsItem(itemId, columnId, silent = false) { if (!newsData[columnId]) return; const itemIndex = newsData[columnId].findIndex(news => news.id === itemId); if (itemIndex > -1) { const itemToArchive = newsData[columnId].splice(itemIndex, 1)[0]; if (!newsArchive[columnId]) newsArchive[columnId] = []; newsArchive[columnId].unshift(itemToArchive); if (!silent) alert(`News item "${itemToArchive.title || 'Untitled'}" archived.`); renderNewsColumn(columnId); saveNewsToLocalStorage(); } }
+        document.querySelectorAll('.view-archive-btn').forEach(button => { button.addEventListener('click', (e) => { const columnId = e.currentTarget.dataset.columnId; openNewsArchiveModal(columnId); }); });
+        function openNewsArchiveModal(columnId) { if (!newsColumns[columnId] || !archiveModalTitle || !archiveFeed || !newsArchiveModal || !mainContent) return; const columnTitle = newsColumns[columnId]?.querySelector('h4')?.textContent || 'Archive'; archiveModalTitle.textContent = `${columnTitle} - Archive`; archiveFeed.innerHTML = ''; const archivedItems = newsArchive[columnId] || []; if (archivedItems.length === 0) { archiveFeed.innerHTML = '<p class="text-amber-100 italic text-sm">No archived news for this column.</p>'; } else { archivedItems.forEach(item => { const archiveItemEl = document.createElement('div'); archiveItemEl.classList.add('news-item', 'mb-2', 'pb-2', 'border-b', 'border-amber-700'); let htmlContent = `<span class="text-sm text-amber-400">${item.timestamp}:</span> `; if (item.title) htmlContent += `<strong class="text-sm">${item.title}:</strong> `; htmlContent += `<span class="text-sm">${item.content}</span>`; if (item.isSystem) archiveItemEl.classList.add('italic', 'text-gray-400'); archiveItemEl.innerHTML = htmlContent; if (currentUser && currentUser.type === 'admin') { const actionsDiv = document.createElement('div'); actionsDiv.classList.add('news-item-actions', 'opacity-100', 'static', 'mt-1'); actionsDiv.innerHTML = `<button class="news-item-btn text-xs" title="Restore"><span class="material-icons text-sm">unarchive</span> Restore</button> <button class="news-item-btn text-xs text-red-400 hover:text-red-300" title="Delete Permanently"><span class="material-icons text-sm">delete_forever</span> Delete</button>`; actionsDiv.querySelector('[title="Restore"]').addEventListener('click', (e) => { e.stopPropagation(); restoreNewsItem(item.id, columnId); }); actionsDiv.querySelector('[title="Delete Permanently"]').addEventListener('click', (e) => { e.stopPropagation(); deleteArchivedNewsItem(item.id, columnId); }); archiveItemEl.appendChild(actionsDiv); } archiveFeed.appendChild(archiveItemEl); }); } newsArchiveModal.classList.add('open'); mainContent.classList.add('blur'); }
+        if (closeNewsArchiveModalBtn) closeNewsArchiveModalBtn.addEventListener('click', () => { if (newsArchiveModal) newsArchiveModal.classList.remove('open'); if (mainContent) mainContent.classList.remove('blur'); });
+        if (newsArchiveModal) newsArchiveModal.addEventListener('click', (event) => { if (event.target === newsArchiveModal) { newsArchiveModal.classList.remove('open'); if (mainContent) mainContent.classList.remove('blur'); } });
+        function restoreNewsItem(itemId, columnId) { if (!newsArchive[columnId] || !newsData) return; const itemIndex = newsArchive[columnId].findIndex(news => news.id === itemId); if (itemIndex > -1) { const itemToRestore = newsArchive[columnId].splice(itemIndex, 1)[0]; if (!newsData[columnId]) newsData[columnId] = []; newsData[columnId].unshift(itemToRestore); renderNewsColumn(columnId); openNewsArchiveModal(columnId); saveNewsToLocalStorage(); alert(`News item "${itemToRestore.title || 'Untitled'}" restored.`); } }
+        function deleteArchivedNewsItem(itemId, columnId) { if (!newsArchive[columnId]) return; const itemIndex = newsArchive[columnId].findIndex(news => news.id === itemId); if (itemIndex > -1) { if (confirm('Are you sure you want to permanently delete this archived item? This cannot be undone.')) { newsArchive[columnId].splice(itemIndex, 1); openNewsArchiveModal(columnId); saveNewsToLocalStorage(); } } }
+        function renderAdminMarkerList() { const markerListAdmin = document.getElementById('markerListAdmin'); if (!markerListAdmin) return; markerListAdmin.innerHTML = ''; const currentMap = mapCollection[currentMapIndex]; if (!currentMap || !currentMap.markers || currentMap.markers.length === 0) { markerListAdmin.innerHTML = '<p class="text-amber-100 italic text-sm">No markers for this map.</p>'; return; } currentMap.markers.forEach(marker => { const item = document.createElement('div'); item.classList.add('flex', 'justify-between', 'items-center', 'p-1', 'border-b', 'border-amber-700'); item.innerHTML = `<span class="text-amber-100 text-sm">${marker.name} (X:${marker.x.toFixed(1)}, Y:${marker.y.toFixed(1)})</span> <div> <button class="text-sky-300 hover:text-sky-100 text-xs p-1 edit-marker-btn" data-id="${marker.id}"><span class="material-icons text-base align-middle">edit</span></button> <button class="text-red-400 hover:text-red-200 text-xs p-1 delete-marker-btn" data-id="${marker.id}"><span class="material-icons text-base align-middle">delete</span></button> </div>`; markerListAdmin.appendChild(item); }); markerListAdmin.querySelectorAll('.edit-marker-btn').forEach(btn => { btn.addEventListener('click', (e) => openEditMarkerModal(e.currentTarget.dataset.id)); }); markerListAdmin.querySelectorAll('.delete-marker-btn').forEach(btn => { btn.addEventListener('click', (e) => { if (confirm('Are you sure you want to delete this marker?')) deleteMarker(e.currentTarget.dataset.id); }); }); }
+        function openEditMarkerModal(markerId = null, defaultX = 50.0, defaultY = 50.0) { const existingModal = document.getElementById('markerEditModal'); if (existingModal) existingModal.remove(); const currentMap = mapCollection[currentMapIndex]; const marker = markerId && currentMap && currentMap.markers ? currentMap.markers.find(m => m.id === markerId) : null; const modal = document.createElement('div'); modal.id = 'markerEditModal'; modal.classList.add('login-modal', 'open'); modal.style.zIndex = "300"; modal.innerHTML = `<div class="login-form steampunk-border relative w-96"> <button class="absolute top-2 right-3 text-amber-100 hover:text-amber-300 text-2xl" id="closeMarkerModalBtn"><span class="material-icons">close</span></button> <h3 class="text-xl font-steampunk-title mb-4 text-center text-amber-300">${markerId ? 'Edit' : 'Add'} Map Marker</h3> <input type="hidden" id="markerIdInput" value="${markerId || ''}"> <div class="mb-3"> <label class="block mb-1 text-amber-100 text-sm" for="markerNameInput">Name:</label> <input id="markerNameInput" type="text" value="${marker ? marker.name : ''}" placeholder="Location Name"/> </div> <div class="grid grid-cols-2 gap-3 mb-3"> <div> <label class="block mb-1 text-amber-100 text-sm" for="markerXInput">X (%):</label> <input id="markerXInput" type="number" min="0" max="100" step="0.1" value="${marker ? marker.x.toFixed(1) : defaultX.toFixed(1)}"/> </div> <div> <label class="block mb-1 text-amber-100 text-sm" for="markerYInput">Y (%):</label> <input id="markerYInput" type="number" min="0" max="100" step="0.1" value="${marker ? marker.y.toFixed(1) : defaultY.toFixed(1)}"/> </div> </div> <div class="mb-3"> <label class="block mb-1 text-amber-100 text-sm" for="markerIconInput">Icon (Material Icon Name):</label> <input id="markerIconInput" type="text" value="${marker ? marker.icon || 'place' : 'place'}" placeholder="e.g., place, castle, forest"/> </div> <div class="mb-4"> <label class="block mb-1 text-amber-100 text-sm" for="markerColorInput">Color (hex or Tailwind class e.g., red, blue-500):</label> <input id="markerColorInput" type="text" value="${marker ? marker.color : 'red'}" placeholder="#FF0000 or red"/> </div> <button class="steampunk-button w-full" id="saveMarkerBtn">Save Marker</button> </div>`; document.body.appendChild(modal); document.getElementById('closeMarkerModalBtn').addEventListener('click', () => modal.remove()); modal.addEventListener('click', (event) => { if (event.target === modal) modal.remove(); }); document.getElementById('saveMarkerBtn').addEventListener('click', saveMarker); }
+        function saveMarker() { const id = document.getElementById('markerIdInput').value; const name = document.getElementById('markerNameInput').value.trim(); const x = parseFloat(document.getElementById('markerXInput').value); const y = parseFloat(document.getElementById('markerYInput').value); const icon = document.getElementById('markerIconInput').value.trim() || 'place'; const color = document.getElementById('markerColorInput').value.trim() || 'red'; if (!name || isNaN(x) || isNaN(y)) { alert('Name, X, and Y coordinates are required.'); return; } const currentMap = mapCollection[currentMapIndex]; if (!currentMap) return; if (!currentMap.markers) currentMap.markers = []; if (id) { const index = currentMap.markers.findIndex(m => m.id === id); if (index > -1) currentMap.markers[index] = { ...currentMap.markers[index], name, x, y, icon, color }; } else { currentMap.markers.push({ id: `marker_${Date.now()}`, name, x, y, icon, color }); } renderMapMarkers(currentMap.markers); renderAdminMarkerList(); document.getElementById('markerEditModal').remove(); saveMapDataToLocalStorage(); }
+        function deleteMarker(markerId) { const currentMap = mapCollection[currentMapIndex]; if (currentMap && currentMap.markers) { currentMap.markers = currentMap.markers.filter(m => m.id !== markerId); renderMapMarkers(currentMap.markers); renderAdminMarkerList(); saveMapDataToLocalStorage(); } }
+        function populatePlayerPanel(playerName) { if (!userPanelContent) return; const playerData = { "cogsworth": { name: "Cogsworth 'Clank' Copperbottom", class: "Artificer", level: 5, quests: 3, gold: 150 }, "lyra": { name: "Lyra Whisperwind", class: "Bard", level: 4, quests: 2, gold: 220 }, "gronak": { name: "Gronak Stonefist", class: "Barbarian", level: 6, quests: 5, gold: 90 } }; const player = playerData[playerName.toLowerCase()]; if (!player) { userPanelContent.innerHTML = `<p class="text-red-400">Error: Player data not found for ${playerName}.</p>`; return; } userPanelContent.innerHTML = `<h3 class="text-xl font-steampunk-title mb-4 text-amber-300">${player.name}'s Dossier</h3> <div class="player-stat-card steampunk-border bg-opacity-50"> <div class="player-stat-item"><span class="player-stat-label">Class:</span><span class="player-stat-value">${player.class}</span></div> <div class="player-stat-item"><span class="player-stat-label">Level:</span><span class="player-stat-value">${player.level}</span></div> <div class="player-stat-item"><span class="player-stat-label">Quests Active:</span><span class="player-stat-value">${player.quests}</span></div> <div class="player-stat-item"><span class="player-stat-label">Coin Pouch:</span><span class="player-stat-value">${player.gold} Gold Cogs</span></div> </div> <p class="mt-3 text-sm text-amber-200 italic">"The gears of fate turn for us all, adventurer."</p>`; }
+        if (toggleUserPanelBtn) toggleUserPanelBtn.addEventListener('click', () => { if (currentUser) { if (userPanel) userPanel.classList.contains('open') ? closeUserPanel() : openUserPanel(); } else { openLoginModal(); } });
+        if (closeLoginModalBtn) closeLoginModalBtn.addEventListener('click', closeLoginModal);
+        if (loginModal) loginModal.addEventListener('click', (event) => { if (event.target === loginModal) closeLoginModal(); });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { if (loginModal && loginModal.classList.contains('open')) closeLoginModal(); if (newsEditModal && newsEditModal.classList.contains('open')) { newsEditModal.classList.remove('open'); if (mainContent) mainContent.classList.remove('blur'); } if (newsArchiveModal && newsArchiveModal.classList.contains('open')) { newsArchiveModal.classList.remove('open'); if (mainContent) mainContent.classList.remove('blur'); } const markerModal = document.getElementById('markerEditModal'); if (markerModal && markerModal.classList.contains('open')) markerModal.remove(); } if (event.key === 'Enter' && loginModal && loginModal.classList.contains('open') && loginBtn && document.activeElement !== loginBtn) loginBtn.click(); });
+        const staticPlayerData = { "cogsworth": { name: "Cogsworth 'Clank' Copperbottom", class: "Artificer", level: 5, quests: 3, gold: 150 }, "lyra": { name: "Lyra Whisperwind", class: "Bard", level: 4, quests: 2, gold: 220 }, "gronak": { name: "Gronak Stonefist", class: "Barbarian", level: 6, quests: 5, gold: 90 } };
+        if (loginBtn) loginBtn.addEventListener('click', () => { if (!usernameInput || !passwordInput) return; const username = usernameInput.value.trim(); const pass = passwordInput.value; if (username.toLowerCase() === "admin" && pass === "password123") { currentUser = { type: 'admin', name: 'Administrator' }; localStorage.setItem('currentUser', JSON.stringify(currentUser)); addNewsToFeed('worldNewsColumn', 'System Access', `Administrator ${currentUser.name} logged in.`, true); closeLoginModal(); populateAdminPanel(); openUserPanel(); } else if (staticPlayerData[username.toLowerCase()] && pass === "playerpass") { currentUser = { type: 'player', name: username }; localStorage.setItem('currentUser', JSON.stringify(currentUser)); addNewsToFeed('worldNewsColumn', 'Player Access', `${staticPlayerData[username.toLowerCase()].name} has entered the chronicles.`, true); closeLoginModal(); populatePlayerPanel(username); openUserPanel(); } else { alert('Invalid credentials. The gears grind in disapproval.'); passwordInput.value = ''; passwordInput.focus(); } if (currentUser) { usernameInput.value = ''; passwordInput.value = ''; if (Object.keys(newsColumns).length > 0) Object.keys(newsColumns).forEach(renderNewsColumn); } const currentMap = mapCollection[currentMapIndex]; if (currentMap) renderMapMarkers(currentMap.markers || []); });
+        if (logoutBtn) logoutBtn.addEventListener('click', () => { if (currentUser) addNewsToFeed('worldNewsColumn', `${currentUser.type === 'admin' ? 'System Access' : 'Player Access'}`, `${currentUser.type === 'admin' ? currentUser.name : staticPlayerData[currentUser.name.toLowerCase()].name} logged out.`, true); currentUser = null; localStorage.removeItem('currentUser'); closeUserPanel(); if (userPanelContent) userPanelContent.innerHTML = ''; logoutBtn.style.display = 'none'; if (Object.keys(newsColumns).length > 0) Object.keys(newsColumns).forEach(renderNewsColumn); const currentMap = mapCollection[currentMapIndex]; if (currentMap) renderMapMarkers(currentMap.markers || []); });
+        function resetMapTransformAndSize(callback) { mapScale = 1; mapPosX = 0; mapPosY = 0; if (!interactiveMapContainer || !interactiveMapContent) { if (callback) callback(); return; } const img = new Image(); img.onload = () => { const aspectRatio = img.width / img.height; const containerWidth = interactiveMapContainer.offsetWidth; const containerHeight = interactiveMapContainer.offsetHeight; if (containerWidth / containerHeight > aspectRatio) { interactiveMapContent.style.width = `${containerHeight * aspectRatio}px`; interactiveMapContent.style.height = `${containerHeight}px`; } else { interactiveMapContent.style.width = `${containerWidth}px`; interactiveMapContent.style.height = `${containerWidth / aspectRatio}px`; } applyMapTransform(); if (callback) callback(); }; img.onerror = () => { interactiveMapContent.style.width = '100%'; interactiveMapContent.style.height = '100%'; applyMapTransform(); if (callback) callback(); }; const currentMapData = mapCollection[currentMapIndex]; if (currentMapData && currentMapData.imageSrc && !currentMapData.imageSrc.startsWith('placeholder_for_')) img.src = currentMapData.imageSrc; else { interactiveMapContent.style.backgroundImage = 'none'; if (mapPlaceholder) mapPlaceholder.style.display = 'flex'; if (callback) callback(); } }
+        function loadNewsFromLocalStorage() { try { const storedNewsData = localStorage.getItem('newsDashboardData'); const storedNewsArchive = localStorage.getItem('newsDashboardArchive'); newsData = storedNewsData ? JSON.parse(storedNewsData) : {}; newsArchive = storedNewsArchive ? JSON.parse(storedNewsArchive) : {}; Object.keys(newsColumns).forEach(columnId => { if (!newsData[columnId]) newsData[columnId] = []; if (!newsArchive[columnId]) newsArchive[columnId] = []; renderNewsColumn(columnId); }); } catch (e) { newsData = {}; newsArchive = {}; Object.keys(newsColumns).forEach(columnId => { newsData[columnId] = []; newsArchive[columnId] = []; renderNewsColumn(columnId); }); } }
+        function saveNewsToLocalStorage() { try { localStorage.setItem('newsDashboardData', JSON.stringify(newsData)); localStorage.setItem('newsDashboardArchive', JSON.stringify(newsArchive)); } catch (e) { } }
+        if (newsPanelHeader && toggleNewsBtn) { newsPanelHeader.addEventListener('click', () => { if (newsPanel) newsPanel.classList.toggle('collapsed'); const icon = toggleNewsBtn.querySelector('.material-icons'); if (icon && newsPanel) icon.textContent = newsPanel.classList.contains('collapsed') ? 'expand_more' : 'expand_less'; }); }
+        let audioUnlocked = false; let alertSoundAudioEl, backgroundMusicAudioEl;
+        function applyTheme() {
+            if (!bodyElement) return;
+            const декоративныеЭлементы = document.querySelectorAll('.decorative-element'); // Получаем все декоративные элементы
+            if (isNightMode) {
+                bodyElement.classList.add('night-mode');
+                if (themeToggleBtn) themeToggleBtn.innerHTML = '<span class="material-icons">wb_sunny</span>';
+                createFireflies();
+                декоративныеЭлементы.forEach(el => el.classList.add('hidden')); // Скрываем все декоративные элементы (шестерни)
+            } else {
+                bodyElement.classList.remove('night-mode');
+                if (themeToggleBtn) themeToggleBtn.innerHTML = '<span class="material-icons">brightness_4</span>';
+                removeFireflies();
+                декоративныеЭлементы.forEach(el => el.classList.remove('hidden')); // Показываем все декоративные элементы (шестерни)
+            }
+        }
+        if (themeToggleBtn) { themeToggleBtn.addEventListener('click', () => { isNightMode = !isNightMode; localStorage.setItem('steampunkTheme', isNightMode.toString()); applyTheme(); }); }
+        function createFireflies() { fireflyContainers.forEach(container => { if (!container) return; container.innerHTML = ''; for (let i = 0; i < NUM_FIREFLIES_PER_CONTAINER; i++) { const firefly = document.createElement('div'); firefly.classList.add('firefly'); firefly.style.left = `${Math.random() * 80 + 10}%`; firefly.style.top = `${Math.random() * 80 + 10}%`; firefly.style.animationDelay = `${Math.random() * 5}s, ${Math.random() * 10}s`; container.appendChild(firefly); } }); }
+        function removeFireflies() { fireflyContainers.forEach(container => { if (container) container.innerHTML = ''; }); }
+        if (toggleDicePanelBtn && diceRollerPanel) toggleDicePanelBtn.addEventListener('click', () => diceRollerPanel.classList.toggle('open'));
+        function updateDiceHistoryDisplay() { if (!diceHistoryDisplay) return; diceHistoryDisplay.innerHTML = ''; diceRollHistory.forEach(rollText => { const div = document.createElement('div'); div.textContent = rollText; diceHistoryDisplay.appendChild(div); }); }
+        function addRollToHistory(rollText) { diceRollHistory.unshift(rollText); if (diceRollHistory.length > MAX_HISTORY_LENGTH) diceRollHistory.pop(); updateDiceHistoryDisplay(); }
+        if (clearDiceHistoryBtn) clearDiceHistoryBtn.addEventListener('click', () => { diceRollHistory = []; updateDiceHistoryDisplay(); if (diceResultDisplay) diceResultDisplay.textContent = '-'; if (diceFormulaInput) diceFormulaInput.value = ''; });
+        if (diceRollerPanel) { diceRollerPanel.querySelectorAll('.dice-buttons-grid button[data-dice-add]').forEach(button => { button.addEventListener('click', () => { if (!diceFormulaInput) return; const diceToAdd = button.dataset.diceAdd; const currentValue = diceFormulaInput.value.trim(); if (currentValue !== "" && !currentValue.endsWith(" ") && !currentValue.endsWith("+") && !currentValue.endsWith("-")) { diceFormulaInput.value += " + "; } diceFormulaInput.value += diceToAdd + " "; diceFormulaInput.focus(); }); }); }
+        if (rollDiceFormulaBtn) { rollDiceFormulaBtn.addEventListener('click', () => { if (!diceFormulaInput || !diceResultDisplay) return; const formula = diceFormulaInput.value.trim(); if (!formula) { diceResultDisplay.textContent = "Enter formula"; return; } const result = parseDiceFormula(formula); if (!isNaN(result.total)) { diceResultDisplay.innerHTML = `<span id="diceRollAnimation">${result.total}</span>`; const animationSpan = document.getElementById('diceRollAnimation'); if (animationSpan) { void animationSpan.offsetWidth; animationSpan.style.animation = 'none'; setTimeout(() => { animationSpan.style.animation = ''; }, 10); } addRollToHistory(`${formula} = ${result.total} [${result.details.trim()}]`); } else { diceResultDisplay.textContent = "Error"; addRollToHistory(`Error: ${formula} -> ${result.details}`); } }); }
+        function parseDiceFormula(formula) { formula = formula.toLowerCase().replace(/\s+/g, ''); const parts = formula.match(/([+-]?)(\d*d\d+|\d+)/g); if (!parts) return { total: NaN, details: "Invalid formula structure" }; let total = 0; let details = []; for (const part of parts) { let sign = 1; let term = part; if (part.startsWith('+')) { term = part.substring(1); } else if (part.startsWith('-')) { sign = -1; term = part.substring(1); } if (term.includes('d')) { const diceParts = term.split('d'); const numDice = diceParts[0] === '' ? 1 : parseInt(diceParts[0]); const sides = parseInt(diceParts[1]); if (isNaN(numDice) || isNaN(sides) || numDice <= 0 || sides <= 0) { details.push(`Invalid dice: ${part}`); continue; } let termRoll = 0; let rolls = []; for (let i = 0; i < numDice; i++) { const roll = Math.floor(Math.random() * sides) + 1; termRoll += roll; rolls.push(roll); } total += sign * termRoll; details.push(`${sign > 0 ? (details.length > 0 ? ' + ' : '') : ' - '}${numDice}d${sides}(${rolls.join(',')})`); } else { const modifier = parseInt(term); if (isNaN(modifier)) { details.push(`Invalid modifier: ${part}`); continue; } total += sign * modifier; details.push(`${sign > 0 ? (details.length > 0 ? ' + ' : '') : ' - '}${modifier}`); } } return { total, details: details.join('').trim().replace(/^\+ /, '') }; }
+        const localAdTemplates = ["Urgent! Need escort for a caravan to {location}. {reward} cogs upon safe arrival. Inquire at the {place}.", "Lost: One slightly singed top hat, answers to 'Sparky'. Sentimental value. Reward offered. Last seen near {place}.", "Bounty: {creature} plaguing the {area}. Proof of dispatch required. {reward} cogs. See {npc_name} at the Guild Hall.", "For Sale: Slightly used Aether-Resonator, minor temporal distortions. As is. {price} cogs or best offer. {contact_info}.", "Help Wanted: Assistant needed for alchemical experiments. Must not be afraid of explosions or an occasional tentacle. Apply at {place}.", "Rumor has it, {npc_name} is looking for brave souls to explore the {ruin_type} ruins near {location}. Danger likely, treasure possible.", "Public Notice: The Annual {event_name} Festival is next week! Prepare your {item_plural}!", "Meme of the Day: Why did the golem break up with the automaton? He said she was too 'rigid' in her ways! #SteamJokes", "Found: A single, ornate gauntlet. If this is yours, describe its matching pair to claim it from {npc_name} the blacksmith.", "Hiring: Experienced sky-ship navigator for a perilous journey through the {dangerous_area}. Generous pay. Only the brave need apply. {contact_info}."];
+        const localAdPlaceholders = { location: ["Cogsworth", "Ironhaven", "Aetheria Prime", "the Whispering Mire", "Skyport Zeta"], reward: ["100", "250", "500", "a hefty sum of", "negotiable"], place: ["the Drunken Cog tavern", "the Tinkerers' Emporium", "the local constabulary", "Madam Fortuna's Shop"], creature: ["a pack of steam-wolves", "a rogue clockwork spider", "a gremlin infestation", "a grumpy land-kraken"], area: ["old mines", "sewer system", "outskirts of town", "trade routes"], npc_name: ["Old Man Hemlock", "Captain Gearloose", "Professor Sprocket", "Lady Ada Coggington"], price: ["50", "75", "120"], contact_info: ["Ask for 'Whispers'", "Leave a note at the Rusty Bolt Inn", "Signal with three green flares at midnight"], ruin_type: ["Dwarven", "Ancient Gnomish", "Forgotten Artificer's"], event_name: ["Gear Grinding", "Steam Piston Polishing", "Aether-Weaving"], item_plural: ["cogs and sprockets", "finest top hats", "clockwork contraptions"], dangerous_area: ["Thunder Peaks", "Maelstrom Expanse", "Shattered Isles"] };
+        function generateRandomLocalAd() { const template = localAdTemplates[Math.floor(Math.random() * localAdTemplates.length)]; let adText = template.replace(/{(\w+)}/g, (match, placeholderKey) => { const options = localAdPlaceholders[placeholderKey]; return options ? options[Math.floor(Math.random() * options.length)] : match; }); return adText; }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            alertSoundAudioEl = document.getElementById("alertSound"); backgroundMusicAudioEl = document.getElementById("backgroundMusic");
+            if (window.steampunkPlayer && typeof window.steampunkPlayer.init === 'function') { if (backgroundMusicAudioEl && alertSoundAudioEl) window.steampunkPlayer.init(backgroundMusicAudioEl, alertSoundAudioEl); else console.error("Steampunk Player: Audio elements not found for init."); }
+            const unlockAudio = () => { if (!audioUnlocked) { if (alertSoundAudioEl && typeof alertSoundAudioEl.play === 'function') alertSoundAudioEl.play().then(() => { alertSoundAudioEl.pause(); alertSoundAudioEl.currentTime = 0; }).catch(e => { }); if (backgroundMusicAudioEl && typeof backgroundMusicAudioEl.play === 'function') backgroundMusicAudioEl.play().then(() => { backgroundMusicAudioEl.pause(); backgroundMusicAudioEl.currentTime = 0; audioUnlocked = true; if (window.steampunkPlayer) window.steampunkPlayer.setAudioUnlocked(true); }).catch(e => { }); } };
+            if (bodyElement) { bodyElement.addEventListener("click", unlockAudio, { once: true }); bodyElement.addEventListener("keydown", unlockAudio, { once: true }); }
+            applyTheme(); loadMapDataFromLocalStorage(); loadNewsFromLocalStorage();
+            const storedUser = localStorage.getItem('currentUser');
+            if (storedUser) { try { currentUser = JSON.parse(storedUser); if (currentUser.type === 'admin') populateAdminPanel(); else if (currentUser.type === 'player') populatePlayerPanel(currentUser.name); if (logoutBtn) logoutBtn.style.display = 'block'; if (Object.keys(newsColumns).length > 0) Object.keys(newsColumns).forEach(renderNewsColumn); const currentMap = mapCollection[currentMapIndex]; if (currentMap) renderMapMarkers(currentMap.markers || []); } catch (e) { localStorage.removeItem('currentUser'); } }
+            updateMagicDisplay(30); updatePressureDisplay(60); updateDarknessDisplay(45); updateDiceHistoryDisplay();
+            if (userPanel && userPanel.classList.contains('open') && toggleUserPanelBtn) { toggleUserPanelBtn.classList.add('minimized'); toggleUserPanelBtn.title = "Close Panel"; }
+            if (Object.keys(newsData).length === 0 || Object.values(newsData).every(arr => arr.length === 0)) { addNewsToFeed('worldNewsColumn', "System Online", "World state nominal.", true); addNewsToFeed('playerNewsColumn', '', 'Awaiting dispatches on the adventurers\' latest exploits...', false, 1); addNewsToFeed('territoryNewsColumn', 'Ironclad Peaks', 'Miners unearth a strange, pulsating ore deep within Mount Cinder. The Foreman has called for investigation.', false); addNewsToFeed('randomWorldNewsColumn', '', 'A peculiar comet was sighted over the capital, its tail shimmering with unknown energies.', false); addNewsToFeed('localEventsColumn', 'Notice Board', generateRandomLocalAd(), false); }
+
+            let currentDraggingGear = null;
+            let gearDragOffsetX, gearDragOffsetY;
+
+            decorativeElements.forEach(el => {
+                if (el.classList.contains('firefly-bg-element')) return;
+
+                el.addEventListener('mousedown', e => {
+                    if (bodyElement.classList.contains('night-mode')) return;
+                    if (e.button !== 0) return; // Только левая кнопка мыши
+
+                    currentDraggingGear = el;
+                    currentDraggingGear.classList.add('dragging');
+
+                    const rect = currentDraggingGear.getBoundingClientRect();
+                    gearDragOffsetX = e.clientX - rect.left;
+                    gearDragOffsetY = e.clientY - rect.top;
+
+                    e.preventDefault();
+                });
+
+                el.addEventListener('click', (e) => {
+                    if (bodyElement.classList.contains('night-mode') || currentDraggingGear) return; // Не обрабатывать клик во время перетаскивания
+
+                    const icon = el.querySelector('.material-icons');
+                    const sparks = el.querySelector('.gear-sparks-effect');
+                    if (icon && sparks) {
+                        icon.classList.add('gear-glow-effect');
+                        sparks.style.transform = 'scale(1)';
+                        setTimeout(() => {
+                            icon.classList.remove('gear-glow-effect');
+                            sparks.style.transform = 'scale(0)';
+                        }, 600);
+                    }
+                });
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (currentDraggingGear) {
+                    currentDraggingGear.style.left = (e.pageX - gearDragOffsetX) + 'px';
+                    currentDraggingGear.style.top = (e.pageY - gearDragOffsetY) + 'px';
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (currentDraggingGear) {
+                    currentDraggingGear.classList.remove('dragging');
+                    currentDraggingGear = null;
+                }
+            });
+
+            setInterval(() => { if (!userPanel || !userPanel.classList.contains('open') || (currentUser && currentUser.type !== 'admin')) { let magicChange = Math.floor(Math.random() * 7) - 3; let pressureChange = Math.floor(Math.random() * 7) - 3; let darknessChange = Math.floor(Math.random() * 5) - 2; updateMagicDisplay(magicLevel + magicChange); updatePressureDisplay(pressureLevel + pressureChange); updateDarknessDisplay(darknessLevel + darknessChange); if (Math.random() < 0.1) { const randomWorldEvents = ["Anomalous energy spike!", "Tectonic shifts reported.", "Sky-merchant overdue."]; addNewsToFeed('randomWorldNewsColumn', 'Whispers', randomWorldEvents[Math.floor(Math.random() * randomWorldEvents.length)]); } if (Math.random() < 0.15) { const localEvents = [{ columnId: 'localEventsColumn', terrain: "Boreal Wilds", events: ["Ice Sculpture contest seeking participants."] }, { columnId: 'localEventsColumn', terrain: "Sunken Depths", events: ["Fishermen netted a colossal squid."] }]; const randomRegion = localEvents[Math.floor(Math.random() * localEvents.length)]; const randomEvent = randomRegion.events[Math.floor(Math.random() * randomRegion.events.length)]; addNewsToFeed(randomRegion.columnId, `(${randomRegion.terrain})`, randomEvent); } } }, 7000);
+        });
+
+        window.steampunkPlayer = (() => {
+            let mainAudio, alarmAudio, playPauseBtn, prevTrackBtn, nextTrackBtn, volumeSlider, trackInfoDisplay;
+            const musicPlaylist = [
+                { name: "Relaxing Green Nature", src: "Музыка/slower-tempo-2020-02-22_-_Relaxing_Green_Nature_-_David_Fesliyan.mp3" },
+                { name: "Cloak And Dagger", src: "Музыка/Slower_Version-2022-02-24_-_Cloak_And_Dagger_-_www.FesliyanStudios.com.mp3" },
+                { name: "Clash Of Heroes", src: "Музыка/Slower_Version-2022-05-25_-_Clash_Of_Heroes_-_www.FesliyanStudios.com.mp3" },
+                { name: "Skin Of Your Teeth", src: "Музыка/Slower_Version-2025-04-15_-_Skin_Of_Your_Teeth_-_www.FesliyanStudios.com.mp3" },
+                { name: "Powerful", src: "Музыка/SLOWER-TEMPO-2020-02-04_-_Powerful_-_David_Fesliyan.mp3" },
+                { name: "Dark Angel", src: "Музыка/SlowMix-2022-02-10_-_Dark_Angel_-_www.FesliyanStudios.com_.mp3" }
+            ];
+            let currentTrackIndex = 0, isPlaying = false, internalAudioUnlocked = false;
+            let criticalIndicatorStates = { magic: false, pressure: false, darkness: false };
+            let isOverallCriticalState = false, originalVolume = 0.3;
+            const MIN_VOLUME_CRITICAL = 0.05;
+            let fadeInterval = null;
+            function initPlayerElements() { playPauseBtn = document.getElementById('playerPlayPauseBtn'); prevTrackBtn = document.getElementById('playerPrevTrackBtn'); nextTrackBtn = document.getElementById('playerNextTrackBtn'); volumeSlider = document.getElementById('playerVolumeSlider'); trackInfoDisplay = document.getElementById('playerTrackInfo'); if (!mainAudio || !alarmAudio || !playPauseBtn || !volumeSlider || !trackInfoDisplay || !prevTrackBtn || !nextTrackBtn) { console.error("Steampunk Player: Critical elements missing!"); return false; } mainAudio.volume = parseFloat(volumeSlider.value) || originalVolume; originalVolume = mainAudio.volume; if (musicPlaylist.length > 0) loadTrack(currentTrackIndex, false); else { if (trackInfoDisplay) trackInfoDisplay.textContent = "No tracks";[playPauseBtn, prevTrackBtn, nextTrackBtn, volumeSlider].forEach(el => { if (el) el.disabled = true; }); } playPauseBtn.addEventListener('click', togglePlayPause); prevTrackBtn.addEventListener('click', playPrevTrack); nextTrackBtn.addEventListener('click', playNextTrack); volumeSlider.addEventListener('input', handleVolumeChange); mainAudio.addEventListener('ended', playNextTrackAuto); mainAudio.addEventListener('play', () => updatePlayPauseButton(true)); mainAudio.addEventListener('pause', () => updatePlayPauseButton(false)); return true; }
+            function loadTrack(index, playWhenReady = true) { if (!mainAudio || musicPlaylist.length === 0 || !musicPlaylist[index]) { if (trackInfoDisplay) trackInfoDisplay.textContent = "Track error"; return; } currentTrackIndex = index; mainAudio.src = musicPlaylist[currentTrackIndex].src; mainAudio.load(); updateTrackInfo(); if (playWhenReady && isPlaying && internalAudioUnlocked) mainAudio.play().catch(e => { }); }
+            function updateTrackInfo() { if (trackInfoDisplay && musicPlaylist.length > 0 && musicPlaylist[currentTrackIndex]) { trackInfoDisplay.textContent = musicPlaylist[currentTrackIndex].name; trackInfoDisplay.title = musicPlaylist[currentTrackIndex].name; } else if (trackInfoDisplay) trackInfoDisplay.textContent = "No Track"; }
+            function updatePlayPauseButton(playing) { if (playPauseBtn) playPauseBtn.innerHTML = `<span class="material-icons">${playing ? 'pause' : 'play_arrow'}</span>`; }
+            function playPrevTrack() { if (musicPlaylist.length === 0) return; currentTrackIndex = (currentTrackIndex - 1 + musicPlaylist.length) % musicPlaylist.length; loadTrack(currentTrackIndex, isPlaying); }
+            function playNextTrack() { if (musicPlaylist.length === 0) return; currentTrackIndex = (currentTrackIndex + 1) % musicPlaylist.length; loadTrack(currentTrackIndex, isPlaying); }
+            function playNextTrackAuto() { if (isPlaying && musicPlaylist.length > 0) playNextTrack(); else if (musicPlaylist.length > 0) { currentTrackIndex = (currentTrackIndex + 1) % musicPlaylist.length; loadTrack(currentTrackIndex, false); updatePlayPauseButton(false); } }
+            function togglePlayPause() { if (musicPlaylist.length === 0) return; if (!internalAudioUnlocked) { if (mainAudio && mainAudio.paused) mainAudio.play().then(() => { mainAudio.pause(); internalAudioUnlocked = true; if (window.steampunkPlayer) window.steampunkPlayer.setAudioUnlocked(true); togglePlayPauseLogic(); }).catch(e => { }); return; } togglePlayPauseLogic(); }
+            function togglePlayPauseLogic() { if (isPlaying) { if (mainAudio) mainAudio.pause(); } else { if (!isOverallCriticalState || (isOverallCriticalState && alarmAudio && alarmAudio.paused)) if (mainAudio) mainAudio.play().catch(error => { }); } isPlaying = !isPlaying; }
+            function handleVolumeChange() { if (!volumeSlider || !mainAudio) return; const newVolume = parseFloat(volumeSlider.value); if (!isOverallCriticalState) { mainAudio.volume = newVolume; originalVolume = newVolume; } else originalVolume = newVolume; }
+            function fadeAudio(audioElement, targetVolume, duration = 700) { return new Promise((resolve) => { if (fadeInterval) clearInterval(fadeInterval); const currentVolume = audioElement.volume; const diff = targetVolume - currentVolume; if (diff === 0) { resolve(); return; } const step = diff / (duration / 50); let iterations = 0; const maxIterations = duration / 50; fadeInterval = setInterval(() => { iterations++; let newVolume = audioElement.volume + step; if ((step > 0 && newVolume >= targetVolume) || (step < 0 && newVolume <= targetVolume) || iterations >= maxIterations) { audioElement.volume = targetVolume; clearInterval(fadeInterval); fadeInterval = null; resolve(); } else audioElement.volume = newVolume; }, 50); }); }
+            function checkOverallCriticalState() { return Object.values(criticalIndicatorStates).some(state => state === true); }
+            async function enterCriticalMode(indicatorType) { if (!mainAudio || !alarmAudio) return; criticalIndicatorStates[indicatorType] = true; const wasAlreadyCritical = isOverallCriticalState; isOverallCriticalState = true; if (!wasAlreadyCritical) { if (isPlaying && mainAudio.volume > MIN_VOLUME_CRITICAL) originalVolume = mainAudio.volume; else if (mainAudio.volume > MIN_VOLUME_CRITICAL) originalVolume = mainAudio.volume; await fadeAudio(mainAudio, MIN_VOLUME_CRITICAL); if (internalAudioUnlocked) { alarmAudio.volume = 1; alarmAudio.currentTime = 0; alarmAudio.play().catch(error => { }); } } }
+            async function exitCriticalMode(indicatorType) { if (!mainAudio || !alarmAudio) return; criticalIndicatorStates[indicatorType] = false; if (!checkOverallCriticalState()) { isOverallCriticalState = false; if (!alarmAudio.paused) alarmAudio.onended = async () => { if (!isOverallCriticalState) await fadeAudio(mainAudio, originalVolume); alarmAudio.onended = null; }; else await fadeAudio(mainAudio, originalVolume); } }
+            if (alarmAudio && typeof alarmAudio.addEventListener === 'function') alarmAudio.addEventListener('ended', () => { if (!isOverallCriticalState && mainAudio && mainAudio.volume < originalVolume) fadeAudio(mainAudio, originalVolume); });
+            return { init: (mainAudioElement, alarmAudioElement) => { mainAudio = mainAudioElement; alarmAudio = alarmAudioElement; if (mainAudio && alarmAudio) { if (initPlayerElements()) console.log("Steampunk Player initialized."); } else console.error("Steampunk Player: mainAudio or alarmAudio not provided to init."); }, setAudioUnlocked: (unlocked) => { internalAudioUnlocked = unlocked; if (unlocked && isPlaying && mainAudio && mainAudio.paused) if (!isOverallCriticalState || (isOverallCriticalState && alarmAudio && alarmAudio.paused)) if (mainAudio) mainAudio.play().catch(e => { }); }, triggerCriticalMode: enterCriticalMode, triggerNormalMode: exitCriticalMode };
+        })();
+    </script>
+</body>
+
+</html>

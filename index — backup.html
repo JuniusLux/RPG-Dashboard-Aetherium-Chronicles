@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Steampunk Fantasy RPG Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&amp;family=Metal+Mania&amp;family=Uncial+Antiqua&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'IM Fell English SC', serif;
+            background-color: #4a3b31;
+            color: #e0ccb1;
+            overflow-x: hidden;
+            position: relative;
+        }
+        .steampunk-border {
+            border: 4px solid #8c6c4f;
+            box-shadow: 0 0 10px #8c6c4f, inset 0 0 10px #5a3d2b;
+            border-radius: 8px;
+            background-color: #6b5a48;
+        }
+        .steampunk-button {
+            background-color: #8c6c4f;
+            color: #e0ccb1;
+            border: 2px solid #5a3d2b;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-family: 'Metal Mania', cursive;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .steampunk-button:hover {
+            background-color: #a07b5c;
+            box-shadow: 0 0 15px #a07b5c;
+        }
+        .gauge-container {
+            width: 120px;
+            height: 60px;
+            position: relative;
+            border: 3px solid #5a3d2b;
+            border-radius: 60px 60px 0 0;
+            background: conic-gradient(#d2b48c 0deg 180deg, transparent 180deg 360deg);
+            overflow: hidden;
+            margin: 10px auto 5px;
+        }
+        .gauge-arrow {
+            width: 2px;
+            height: 54px;
+            background-color: #1a1a1a;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-90deg);
+            transition: transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border-radius: 1px 1px 0 0;
+        }
+        .gauge-arrow::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: #1a1a1a;
+            border-radius: 50%;
+        }
+        .crystal-container {
+            width: 60px;
+            height: 120px;
+            border: 3px solid #708090;
+            border-radius: 30px 30px 6px 6px / 12px 12px 60px 60px;
+            position: relative;
+            overflow: hidden;
+            background-color: #2f4f4f;
+            margin: 10px auto 5px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .crystal-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, #4682b4, #87ceeb);
+            transition: height 1s ease-out;
+            box-shadow: 0 0 12px #87ceeb;
+        }
+        .barometer-container {
+            width: 50px;
+            height: 160px;
+            border: 4px solid #7a5c3d;
+            border-radius: 25px 25px 6px 6px;
+            position: relative;
+            overflow: hidden;
+            background-color: #523a28;
+            margin: 10px auto 5px;
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6);
+        }
+        .barometer-liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, #1a0e05, #4d2a0f);
+            transition: height 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 0 10px #3c1f0a;
+        }
+        .barometer-glass-sheen {
+            position: absolute;
+            top: 5%;
+            left: 10%;
+            width: 20%;
+            height: 80%;
+            background: rgba(224, 204, 177, 0.15);
+            border-radius: 20px;
+            pointer-events: none;
+        }
+        .news-panel {
+            position: relative;
+            bottom: auto;
+            left: auto;
+            right: auto;
+            margin-top: 40px;
+            max-height: 40vh;
+            background-color: #382c22;
+            border-top: 4px solid #8c6c4f;
+            padding: 0;
+            overflow: hidden;
+            font-size: 0.9em;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            transition: max-height 0.5s ease-in-out;
+            width: 100%;
+        }
+        .news-panel.collapsed {
+            max-height: 65px;
+        }
+        .news-panel-header {
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 2px double #8c6c4f;
+        }
+        .newspaper-title {
+            font-family: 'Uncial Antiqua', cursive;
+            font-size: 2.5rem;
+            text-align: center;
+            color: #d4b897;
+            text-shadow: 1px 1px #1a1a1a, 2px 2px #8c6c4f;
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+            flex-grow: 1;
+        }
+        .toggle-news-btn {
+            font-size: 1.5rem;
+            color: #c8a079;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .toggle-news-btn .material-icons {
+            transition: transform 0.3s ease;
+        }
+        .news-panel.collapsed .toggle-news-btn .material-icons {
+            transform: rotate(180deg);
+        }
+        .newspaper-content {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .newspaper-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .news-column {
+            background-color: rgba(224, 204, 177, 0.05);
+            border: 1px solid #5a3d2b;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-y: auto;
+            max-height: calc(40vh - 100px);
+            display: flex;
+            flex-direction: column;
+        }
+        .news-column h4 {
+            font-family: 'Metal Mania', cursive;
+            font-size: 1.2rem;
+            color: #c8a079;
+            border-bottom: 1px solid #8c6c4f;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .news-item {
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #705943;
+            padding-bottom: 8px;
+            font-size: 0.85em;
+            line-height: 1.4;
+            position: relative;
+            padding-right: 50px;}
+        .news-item:last-child {
+            border-bottom: none;
+        }
+        .news-item strong {
+            color: #e0ccb1;
+            font-weight: bold;
+        }
+        .news-item em {
+            color: #bfa78a;
+            font-style: italic;
+        }
+        .news-item-actions {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            display: flex;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .news-item:hover .news-item-actions {
+            opacity: 1;
+        }
+        .news-item-btn {
+            background: none;
+            border: none;
+            color: #c8a079;
+            cursor: pointer;
+            padding: 2px 3px;
+            margin-left: 2px;
+            font-size: 0.8rem;
+        }
+        .news-item-btn .material-icons {
+            font-size: 1rem;
+            vertical-align: middle;
+        }
+        .news-item-btn:hover {
+            color: #e0ccb1;
+        }
+        .news-feed-column {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .archive-controls {
+            margin-top: auto;padding-top: 10px;
+            border-top: 1px solid #5a3d2b;
+            text-align: center;
+        }
+        .view-archive-btn {
+            font-size: 0.8em;
+            padding: 5px 10px;
+        }
+        .user-panel {
+            position: fixed;
+            top: 20px;
+            right: -400px;
+            width: 350px;
+            padding: 20px;
+            transition: right 0.5s ease-in-out;
+            z-index: 100;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        .user-panel.open {
+            right: 20px;
+        }
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .login-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .login-form {
+            padding: 30px;
+            width: 350px;
+        }
+        .main-content.blur {
+            filter: blur(5px);
+            transition: filter 0.3s ease;
+        }
+        .main-content {
+            transition: filter 0.3s ease;
+            padding-bottom: 50px;
+            min-height: 100vh;
+        }
+        input[type="number"],
+        input[type="password"],
+        input[type="text"],
+        input[type="file"],
+        textarea,
+        select {
+            background-color: #e0ccb1;
+            color: #4a3b31;
+            border: 2px solid #8c6c4f;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: 'IM Fell English SC', serif;
+        }
+        input[type="file"] {
+            padding: 3px;
+        }
+        input[type="file"]::file-selector-button {
+            background-color: #8c6c4f;
+            color: #e0ccb1;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 2px;
+            font-family: 'Metal Mania', cursive;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%234a3b31' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1em;
+            padding-right: 2.5rem;
+        }
+        input[type="number"]:focus,
+        input[type="password"]:focus,
+        input[type="text"]:focus,
+        input[type="file"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 10px #a07b5c;
+        }
+        .gear {
+            width: 80px;
+            height: 80px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50,10 A40,40 0 0,1 50,90 A40,40 0 0,1 50,10 Z M50,18 A32,32 0 0,0 50,82 A32,32 0 0,0 50,18 Z' fill='%238c6c4f'/%3E%3Cpath d='M50,0 L50,15 M50,85 L50,100 M0,50 L15,50 M85,50 L100,50 M14.6,14.6 L25.2,25.2 M74.8,74.8 L85.4,85.4 M14.6,85.4 L25.2,74.8 M74.8,25.2 L85.4,14.6' stroke='%238c6c4f' stroke-width='5'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%235a3d2b'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            animation: spin 10s linear infinite;
+            position: absolute;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .font-steampunk-title {
+            font-family: 'Metal Mania', cursive;
+            font-size: 2.2rem;
+            color: #c8a079;
+            text-shadow: 2px 2px #382c22;
+        }
+        .player-stat-card {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .player-stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #8c6c4f;
+        }
+        .player-stat-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .player-stat-label {
+            font-weight: bold;
+            color: #d4b897;
+        }
+        .player-stat-value {
+            color: #e0ccb1;
+        }
+        .news-column::-webkit-scrollbar,
+        .user-panel::-webkit-scrollbar,
+        .news-feed-column::-webkit-scrollbar {
+            width: 8px;
+        }
+        .news-column::-webkit-scrollbar-track,
+        .user-panel::-webkit-scrollbar-track,
+        .news-feed-column::-webkit-scrollbar-track {
+            background: #5a3d2b;
+            border-radius: 4px;
+        }
+        .news-column::-webkit-scrollbar-thumb,
+        .user-panel::-webkit-scrollbar-thumb,
+        .news-feed-column::-webkit-scrollbar-thumb {
+            background: #8c6c4f;
+            border-radius: 4px;
+        }
+        .news-column::-webkit-scrollbar-thumb:hover,
+        .user-panel::-webkit-scrollbar-thumb:hover,
+        .news-feed-column::-webkit-scrollbar-thumb:hover {
+            background: #a07b5c;
+        }
+        .interactive-map-container {
+            width: 100%;
+            height: 450px;
+            background-color: #2f2a24;
+            border: 3px solid #8c6c4f;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+            cursor: grab;
+        }
+        .interactive-map-content {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            transform-origin: 0 0;
+            transition: transform 0.2s ease-out;
+        }
+        .interactive-map-container.grabbing .interactive-map-content {
+            cursor: grabbing;
+        }
+        .map-marker {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: red;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            box-shadow: 0 0 5px black;
+            user-select: none;
+            transform-origin: center;
+        }
+        .map-marker-tooltip {
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(40, 30, 20, 0.9);
+            color: #e0ccb1;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s, visibility 0.2s;
+            border: 1px solid #8c6c4f;
+            z-index: 10;
+        }
+        .map-marker:hover .map-marker-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        .indicator-panel {
+            position: relative;
+            padding: 15px;
+            background-color: rgba(74, 59, 49, 0.3);
+            border-radius: 8px;
+            border: 2px solid #5a3d2b;
+        }
+        .indicator-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .indicator-item:last-child {
+            margin-bottom: 0;
+        }
+        .user-access-button-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 105;
+        }
+        .engine-light {
+            width: 15px;
+            height: 15px;
+            background-color: #ffcc00;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulseLight 2s infinite;
+            box-shadow: 0 0 8px #ffcc00;
+            display: inline-block;
+        }
+        @keyframes pulseLight {
+            0% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.5;
+            }
+        }
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .map-control-btn {
+            background-color: #8c6c4f;
+            color: #e0ccb1;
+            border: 1px solid #5a3d2b;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            font-family: 'Metal Mania', cursive;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        .map-control-btn:hover {
+            background-color: #a07b5c;
+        }
+        .map-control-btn .material-icons {
+            font-size: 18px;
+        }
+        .news-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 300;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .news-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .news-modal-content {
+            padding: 30px;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .news-modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .news-modal-content::-webkit-scrollbar-track {
+            background: #5a3d2b;
+            border-radius: 4px;
+        }
+        .news-modal-content::-webkit-scrollbar-thumb {
+            background: #8c6c4f;
+            border-radius: 4px;
+        }
+        .news-modal-content::-webkit-scrollbar-thumb:hover {
+            background: #a07b5c;
+        }
+    </style>
+</head>
+<body class="overflow-y-auto">
+<div class="gear" style="top: 5%; left: 5%; width: 100px; height: 100px; animation-duration: 12s; z-index: 0;"></div>
+<div class="gear" style="top: 60%; right: 2%; width: 60px; height: 60px; animation-duration: 8s; animation-direction: reverse; z-index: 0;"></div>
+<div class="gear" style="top: 80vh; left: 2%; width: 120px; height: 120px; animation-duration: 15s; z-index: 0;"></div>
+<div class="gear" style="top: 120vh; right: 5%; width: 90px; height: 90px; animation-duration: 10s; animation-direction: reverse; z-index: 0;"></div>
+<div class="user-access-button-container" id="userAccessButtonContainer">
+<button class="steampunk-button text-sm py-2 px-3 flex items-center" id="toggleUserPanelBtn">
+<span class="material-icons mr-2">login</span> Access Portal
+        </button>
+</div>
+<div class="main-content container mx-auto p-4 flex flex-col items-center" id="mainContent">
+<header class="text-center my-6 md:my-8">
+<h1 class="font-steampunk-title text-4xl">Aetherium Chronicles</h1>
+<p class="text-lg text-amber-200">The Age of Gears and Sorcery</p>
+</header>
+<div class="w-full mx-auto" id="dashboardContent">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+<div class="lg:col-span-2 steampunk-border p-3">
+<div class="flex justify-between items-center mb-3">
+<h2 class="font-steampunk-title text-amber-300 text-2xl">Cartographer's Domain</h2>
+<input accept="image/*" class="steampunk-button text-xs py-1 px-2 hidden" id="mapUpload" type="file"/>
+<label class="steampunk-button text-xs py-1 px-2 cursor-pointer flex items-center" for="mapUpload">
+<span class="material-icons text-sm mr-1">upload_file</span> Upload Map
+                        </label>
+</div>
+<div class="interactive-map-container" id="interactiveMapContainer">
+<div class="interactive-map-content" id="interactiveMapContent"></div>
+<div class="map-controls">
+<button class="map-control-btn" id="zoomInBtn"><span class="material-icons">add</span></button>
+<button class="map-control-btn" id="zoomOutBtn"><span class="material-icons">remove</span></button>
+<button class="map-control-btn" id="resetMapBtn"><span class="material-icons">refresh</span></button>
+</div>
+</div>
+</div>
+<div class="indicator-panel" id="indicatorPanel">
+<div class="indicator-item relative" data-indicator-id="magic">
+<h2 class="text-lg font-steampunk-title mb-1 text-sky-300 text-center">Aetherial Font</h2>
+<div class="crystal-container steampunk-border mx-auto">
+<div class="crystal-fill" id="magicCrystalFill"></div>
+</div>
+<p class="text-sm mt-1 text-center">Magic: <span id="magicValueDisplay">0</span>%</p>
+</div>
+<div class="indicator-item relative" data-indicator-id="pressure">
+<h2 class="text-lg font-steampunk-title mb-1 text-orange-400 text-center">Chronomantic Pressure</h2>
+<div class="gauge-container mx-auto">
+<div class="gauge-arrow" id="pressureGaugeArrow"></div>
+</div>
+<p class="text-sm mt-1 text-center">Pressure: <span id="pressureValueDisplay">0</span>%</p>
+</div>
+<div class="indicator-item relative" data-indicator-id="darkness">
+<h2 class="text-lg font-steampunk-title mb-1 text-neutral-400 text-center">Umbral Barometer</h2>
+<div class="barometer-container steampunk-border mx-auto">
+<div class="barometer-liquid" id="darknessBarometerFill"></div>
+<div class="barometer-glass-sheen"></div>
+</div>
+<p class="text-sm mt-1 text-center">Darkness: <span id="darknessValueDisplay">0</span>%</p>
+</div>
+</div>
+</div>
+<div class="mt-8 text-center w-full lg:col-span-3">
+<p class="text-amber-100 text-lg mb-6"> The world of Aetherium is vast and ever-changing. Explore its wonders, uncover its secrets, and forge your legend amidst the whirring gears and crackling enchantments. </p>
+<p class="text-amber-100 text-md"> From the towering, smog-choked cities of the Artificers' Guilds to the mystical, crystal-laden forests where ancient magic still holds sway, adventure awaits at every turn. Will you master the intricate clockwork mechanisms or delve into the forbidden lore of the arcane? The choice, and the consequences, are yours. </p>
+</div>
+</div>
+<div class="news-panel steampunk-border mt-10" id="newsPanel">
+<div class="news-panel-header" id="newsPanelHeader">
+<h3 class="newspaper-title">The Aetherium Chronicle</h3>
+<button class="toggle-news-btn" id="toggleNewsBtn">
+<span class="material-icons">expand_less</span>
+</button>
+</div>
+<div class="newspaper-content">
+<div class="newspaper-grid">
+<div class="news-column" data-column-id="playerNewsColumn" id="playerNewsColumn">
+<h4>Heroes' Herald</h4>
+<div class="news-feed-column" id="playerNewsFeed">
+<div class="news-item"><em>Awaiting dispatches on the adventurers' latest exploits...</em></div>
+</div>
+<div class="archive-controls">
+<button class="steampunk-button view-archive-btn" data-column-id="playerNewsColumn">View Archive</button>
+</div>
+</div>
+<div class="news-column" data-column-id="worldNewsColumn" id="worldNewsColumn">
+<h4>World Stage</h4>
+<div class="news-feed-column" id="worldNewsFeed">
+<div class="news-item">The Grand Cogswork reports a breakthrough in aether-compression! Effects on travel and industry are anticipated.</div>
+<div class="news-item">Rumors of sky-leviathans stirring in the Cloudcoil Mountains intensify as a merchant airship goes missing.</div>
+</div>
+<div class="archive-controls">
+<button class="steampunk-button view-archive-btn" data-column-id="worldNewsColumn">View Archive</button>
+</div>
+</div>
+<div class="news-column" data-column-id="territoryNewsColumn" id="territoryNewsColumn">
+<h4>Regional Reports</h4>
+<div class="news-feed-column" id="territoryNewsFeed">
+<div class="news-item"><strong>Ironclad Peaks:</strong> Miners unearth a strange, pulsating ore deep within Mount Cinder. The Foreman has called for investigation.</div>
+<div class="news-item"><strong>Whispering Mire:</strong> Local tribes report unusual luminescence from the ancient bog ruins. Scholars are perplexed.</div>
+</div>
+<div class="archive-controls">
+<button class="steampunk-button view-archive-btn" data-column-id="territoryNewsColumn">View Archive</button>
+</div>
+</div>
+<div class="news-column" data-column-id="randomWorldNewsColumn" id="randomWorldNewsColumn">
+<h4>Whispers on the Wind</h4>
+<div class="news-feed-column" id="randomWorldNewsFeed">
+<div class="news-item">A peculiar comet was sighted over the capital, its tail shimmering with unknown energies.</div>
+<div class="news-item">The Alchemists' Guild announces new tariffs on enchanted metals, citing scarcity.</div>
+</div>
+<div class="archive-controls">
+<button class="steampunk-button view-archive-btn" data-column-id="randomWorldNewsColumn">View Archive</button>
+</div>
+</div>
+<div class="news-column" data-column-id="localEventsNorthColumn" id="localEventsNorthColumn">
+<h4>Northern Gazette</h4>
+<div class="news-feed-column" id="localNorthFeed">
+<div class="news-item">Frostfang Village prepares for its annual Ice Carving Festival. Merchants expect a bountiful trade season.</div>
+</div>
+<div class="archive-controls">
+<button class="steampunk-button view-archive-btn" data-column-id="localEventsNorthColumn">View Archive</button>
+</div>
+</div>
+<div class="news-column" data-column-id="localEventsEastColumn" id="localEventsEastColumn">
+<h4>Eastern Scroll</h4>
+<div class="news-feed-column" id="localEastFeed">
+<div class="news-item">Pearl divers in Coralport report an unusually calm tide, making for a prosperous harvest of deep-sea treasures.</div>
+</div>
+<div class="archive-controls">
+<button class="steampunk-button view-archive-btn" data-column-id="localEventsEastColumn">View Archive</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="user-panel steampunk-border" id="userPanel">
+<div id="userPanelContent"></div>
+<button class="steampunk-button w-full bg-red-700 hover:bg-red-600 border-red-900 mt-4" id="logoutBtn" style="display: none;">Logout</button>
+</div>
+<div class="login-modal" id="loginModal">
+<div class="login-form steampunk-border relative">
+<button class="absolute top-2 right-3 text-amber-100 hover:text-amber-300 text-2xl" id="closeLoginModalBtn">
+<span class="material-icons">close</span>
+</button>
+<h3 class="text-2xl font-steampunk-title mb-6 text-center text-amber-300">Secure Access</h3>
+<div class="mb-4">
+<label class="block mb-1 text-amber-100" for="usernameInput">Operator ID / Player Name:</label>
+<input id="usernameInput" placeholder="Enter your designation" type="text"/>
+</div>
+<div class="mb-6">
+<label class="block mb-1 text-amber-100" for="passwordInput">Password:</label>
+<input id="passwordInput" placeholder="Enter access code" type="password"/>
+</div>
+<button class="steampunk-button w-full" id="loginBtn">Authenticate</button>
+</div>
+</div>
+<div class="news-modal" id="newsEditModal">
+<div class="news-modal-content steampunk-border">
+<button class="absolute top-3 right-4 text-amber-100 hover:text-amber-300 text-3xl" id="closeNewsEditModalBtn">
+<span class="material-icons">close</span>
+</button>
+<h3 class="text-2xl font-steampunk-title mb-6 text-center text-amber-300">Edit News Dispatch</h3>
+<input id="editNewsItemId" type="hidden"/>
+<input id="editNewsColumnId" type="hidden"/>
+<div class="mb-4">
+<label class="block mb-1 text-amber-100" for="editNewsTitleInput">Headline (Optional):</label>
+<input id="editNewsTitleInput" placeholder="e.g., Urgent Bulletin!" type="text"/>
+</div>
+<div class="mb-4">
+<label class="block mb-1 text-amber-100" for="editNewsContentInput">Content:</label>
+<textarea id="editNewsContentInput" placeholder="Details of the dispatch..." rows="3"></textarea>
+</div>
+<div class="mb-4">
+<label class="block mb-1 text-amber-100" for="editNewsTargetFeed">Move to Column:</label>
+<select id="editNewsTargetFeed">
+<option value="playerNewsColumn">Heroes' Herald</option>
+<option value="worldNewsColumn">World Stage</option>
+<option value="territoryNewsColumn">Regional Reports</option>
+<option value="randomWorldNewsColumn">Whispers on the Wind</option>
+<option value="localEventsNorthColumn">Northern Gazette</option>
+<option value="localEventsEastColumn">Eastern Scroll</option>
+</select>
+</div>
+<button class="steampunk-button w-full" id="saveNewsEditBtn">Save Changes</button>
+</div>
+</div>
+<div class="news-modal" id="newsArchiveModal">
+<div class="news-modal-content steampunk-border">
+<button class="absolute top-3 right-4 text-amber-100 hover:text-amber-300 text-3xl" id="closeNewsArchiveModalBtn">
+<span class="material-icons">close</span>
+</button>
+<h3 class="text-2xl font-steampunk-title mb-6 text-center text-amber-300" id="archiveModalTitle">News Archive</h3>
+<div class="max-h-96 overflow-y-auto pr-2" id="archiveFeed">
+</div>
+</div>
+</div>
+<script>
+        const magicCrystalFill = document.getElementById('magicCrystalFill');
+        const magicValueDisplay = document.getElementById('magicValueDisplay');
+        const pressureGaugeArrow = document.getElementById('pressureGaugeArrow');
+        const pressureValueDisplay = document.getElementById('pressureValueDisplay');
+        const darknessBarometerFill = document.getElementById('darknessBarometerFill');
+        const darknessValueDisplay = document.getElementById('darknessValueDisplay');
+        const newsFeeds = {
+            playerNewsFeed: document.getElementById('playerNewsFeed'),
+            worldNewsFeed: document.getElementById('worldNewsFeed'),
+            territoryNewsFeed: document.getElementById('territoryNewsFeed'),
+            randomWorldNewsFeed: document.getElementById('randomWorldNewsFeed'),
+            localNorthFeed: document.getElementById('localNorthFeed'),
+            localEastFeed: document.getElementById('localEastFeed')
+        };
+        const newsColumns = {
+            playerNewsColumn: document.getElementById('playerNewsColumn'),
+            worldNewsColumn: document.getElementById('worldNewsColumn'),
+            territoryNewsColumn: document.getElementById('territoryNewsColumn'),
+            randomWorldNewsColumn: document.getElementById('randomWorldNewsColumn'),
+            localEventsNorthColumn: document.getElementById('localEventsNorthColumn'),
+            localEventsEastColumn: document.getElementById('localEventsEastColumn')
+        };
+        const userPanel = document.getElementById('userPanel');
+        const userPanelContent = document.getElementById('userPanelContent');
+        const toggleUserPanelBtn = document.getElementById('toggleUserPanelBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginModal = document.getElementById('loginModal');
+        const loginBtn = document.getElementById('loginBtn');
+        const closeLoginModalBtn = document.getElementById('closeLoginModalBtn');
+        const passwordInput = document.getElementById('passwordInput');
+        const usernameInput = document.getElementById('usernameInput');
+        const mainContent = document.getElementById('mainContent');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const interactiveMapContainer = document.getElementById('interactiveMapContainer');
+        const interactiveMapContent = document.getElementById('interactiveMapContent');
+        const mapUploadInput = document.getElementById('mapUpload');
+        const newsPanel = document.getElementById('newsPanel');
+        const toggleNewsBtn = document.getElementById('toggleNewsBtn');
+        const newsPanelHeader = document.getElementById('newsPanelHeader');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const resetMapBtn = document.getElementById('resetMapBtn');
+        const newsEditModal = document.getElementById('newsEditModal');
+        const closeNewsEditModalBtn = document.getElementById('closeNewsEditModalBtn');
+        const saveNewsEditBtn = document.getElementById('saveNewsEditBtn');
+        const editNewsItemIdInput = document.getElementById('editNewsItemId');
+        const editNewsColumnIdInput = document.getElementById('editNewsColumnId');
+        const editNewsTitleInput = document.getElementById('editNewsTitleInput');
+        const editNewsContentInput = document.getElementById('editNewsContentInput');
+        const editNewsTargetFeedSelect = document.getElementById('editNewsTargetFeed');
+        const newsArchiveModal = document.getElementById('newsArchiveModal');
+        const closeNewsArchiveModalBtn = document.getElementById('closeNewsArchiveModalBtn');
+        const archiveModalTitle = document.getElementById('archiveModalTitle');
+        const archiveFeed = document.getElementById('archiveFeed');
+        let magicLevel = 0;
+        let pressureLevel = 0;
+        let darknessLevel = 0;
+        let currentUser = null;
+        let mapMarkers = [{
+            id: 'marker1',
+            x: 30,
+            y: 20,
+            name: 'Ironclad Peaks',
+            icon: 'place',
+            color: 'red'
+        }, {
+            id: 'marker2',
+            x: 60,
+            y: 55,
+            name: 'Whispering Mire',
+            icon: 'water_drop',
+            color: 'blue-500'
+        }, {
+            id: 'marker3',
+            x: 15,
+            y: 70,
+            name: 'Verdant Jungle',
+            icon: 'forest',
+            color: 'green-500'
+        }, ];
+        let mapScale = 1;
+        let mapPosX = 0;
+        let mapPosY = 0;
+        let isPanning = false;
+        let lastPanX, lastPanY;
+        const minScale = 0.5;
+        const maxScale = 3;
+        const zoomSensitivity = 0.1;
+        let newsData = {}; // Stores active news items { columnId: [{id, title, content, timestamp, isSystem}, ...], ... }
+        let newsArchive = {}; // Stores archived news { columnId: [{...}], ... }
+        function updateMagicDisplay(value) {
+            magicLevel = Math.max(0, Math.min(100, value));
+            magicCrystalFill.style.height = `${magicLevel}%`;
+            magicValueDisplay.textContent = magicLevel;
+            if (currentUser && currentUser.type === 'admin' && document.getElementById('magicInputAdmin')) {
+                document.getElementById('magicInputAdmin').value = magicLevel;
+            }
+        }
+        function updatePressureDisplay(value) {
+            pressureLevel = Math.max(0, Math.min(100, value));
+            const rotation = (pressureLevel / 100) * 180 - 90;
+            pressureGaugeArrow.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+            pressureValueDisplay.textContent = pressureLevel;
+            if (currentUser && currentUser.type === 'admin' && document.getElementById('pressureInputAdmin')) {
+                document.getElementById('pressureInputAdmin').value = pressureLevel;
+            }
+        }
+        function updateDarknessDisplay(value) {
+            darknessLevel = Math.max(0, Math.min(100, value));
+            darknessBarometerFill.style.height = `${darknessLevel}%`;
+            darknessValueDisplay.textContent = darknessLevel;
+            if (currentUser && currentUser.type === 'admin' && document.getElementById('darknessInputAdmin')) {
+                document.getElementById('darknessInputAdmin').value = darknessLevel;
+            }
+        }
+        function applyMapTransform() {
+            interactiveMapContent.style.transform = `translate(${mapPosX}px, ${mapPosY}px) scale(${mapScale})`;
+        }
+        function renderMapMarkers() {
+            const currentMarkers = Array.from(interactiveMapContent.querySelectorAll('.map-marker'));
+            currentMarkers.forEach(m => m.remove());
+            mapMarkers.forEach(marker => {
+                const markerEl = document.createElement('div');
+                markerEl.classList.add('map-marker');
+                markerEl.style.top = `${marker.y}%`;
+                markerEl.style.left = `${marker.x}%`;
+                markerEl.style.backgroundColor = marker.color !== 'red' && marker.color !== 'blue-500' && marker.color !== 'green-500' ? marker.color : '';
+                if (marker.color === 'red' || marker.color === 'blue-500' || marker.color === 'green-500') {
+                    markerEl.classList.add(`bg-${marker.color}`);
+                }
+                markerEl.innerHTML = `
+                <span class="material-icons text-sm">${marker.icon || 'place'}</span>
+                <div class="map-marker-tooltip">${marker.name}</div>
+            `;
+                markerEl.dataset.id = marker.id;
+                interactiveMapContent.appendChild(markerEl);
+                if (currentUser && currentUser.type === 'admin') {
+                    markerEl.addEventListener('dblclick', () => openEditMarkerModal(marker.id));
+                }
+            });
+        }
+        // MAP INTERACTION
+        function handleMapMouseDown(e) {
+            if (e.button !== 0) return;
+            isPanning = true;
+            interactiveMapContainer.classList.add('grabbing');
+            lastPanX = e.clientX;
+            lastPanY = e.clientY;
+            document.addEventListener('mousemove', handleMapMouseMove);
+            document.addEventListener('mouseup', handleMapMouseUp);
+            document.addEventListener('mouseleave', handleMapMouseUp);
+        }
+        function handleMapMouseMove(e) {
+            if (!isPanning) return;
+            const dx = e.clientX - lastPanX;
+            const dy = e.clientY - lastPanY;
+            mapPosX += dx;
+            mapPosY += dy;
+            lastPanX = e.clientX;
+            lastPanY = e.clientY;
+            applyMapTransform();
+        }
+        function handleMapMouseUp() {
+            if (!isPanning) return;
+            isPanning = false;
+            interactiveMapContainer.classList.remove('grabbing');
+            document.removeEventListener('mousemove', handleMapMouseMove);
+            document.removeEventListener('mouseup', handleMapMouseUp);
+            document.removeEventListener('mouseleave', handleMapMouseUp);
+        }
+        function handleMapWheel(e) {
+            e.preventDefault();
+            const rect = interactiveMapContainer.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const mouseMapX = (mouseX - mapPosX) / mapScale;
+            const mouseMapY = (mouseY - mapPosY) / mapScale;
+            const delta = e.deltaY > 0 ? -zoomSensitivity : zoomSensitivity;
+            const newScale = Math.max(minScale, Math.min(maxScale, mapScale * (1 + delta)));
+            mapPosX = mouseX - mouseMapX * newScale;
+            mapPosY = mouseY - mouseMapY * newScale;
+            mapScale = newScale;
+            applyMapTransform();
+        }
+        zoomInBtn.addEventListener('click', () => {
+            const rect = interactiveMapContainer.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const centerMapX = (centerX - mapPosX) / mapScale;
+            const centerMapY = (centerY - mapPosY) / mapScale;
+            mapScale = Math.min(maxScale, mapScale * (1 + zoomSensitivity * 2));
+            mapPosX = centerX - centerMapX * mapScale;
+            mapPosY = centerY - centerMapY * mapScale;
+            applyMapTransform();
+        });
+        zoomOutBtn.addEventListener('click', () => {
+            const rect = interactiveMapContainer.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const centerMapX = (centerX - mapPosX) / mapScale;
+            const centerMapY = (centerY - mapPosY) / mapScale;
+            mapScale = Math.max(minScale, mapScale / (1 + zoomSensitivity * 2));
+            mapPosX = centerX - centerMapX * mapScale;
+            mapPosY = centerY - centerMapY * mapScale;
+            applyMapTransform();
+        });
+        resetMapBtn.addEventListener('click', () => {
+            mapScale = 1;
+            mapPosX = 0;
+            mapPosY = 0;
+            applyMapTransform();
+        });
+        interactiveMapContainer.addEventListener('mousedown', handleMapMouseDown);
+        interactiveMapContainer.addEventListener('wheel', handleMapWheel, {
+            passive: false
+        });
+        // NEWS MANAGEMENT
+        function generateNewsItemId() {
+            return `news_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        }
+        function renderNewsColumn(columnId) {
+            const feedElement = newsFeeds[columnId.replace('Column', 'Feed')];
+            if (!feedElement) return;
+            feedElement.innerHTML = ''; // Clear existing items
+            const items = newsData[columnId] || [];
+            if (items.length === 0) {
+                const placeholder = document.createElement('div');
+                placeholder.classList.add('news-item');
+                placeholder.innerHTML = '<em>Awaiting dispatches...</em>';
+                feedElement.appendChild(placeholder);
+                return;
+            }
+            items.forEach(item => {
+                const newsItemEl = document.createElement('div');
+                newsItemEl.classList.add('news-item');
+                newsItemEl.dataset.itemId = item.id;
+                newsItemEl.dataset.columnId = columnId;
+                let htmlContent = `<span class="text-amber-400">${item.timestamp}:</span> `;
+                if (item.title) htmlContent += `<strong>${item.title}:</strong> `;
+                htmlContent += item.content;
+                if (item.isSystem) newsItemEl.classList.add('italic', 'text-gray-400');
+                newsItemEl.innerHTML = htmlContent;
+                if (currentUser && currentUser.type === 'admin') {
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.classList.add('news-item-actions');
+                    actionsDiv.innerHTML = `
+                        <button class="news-item-btn" title="Edit"><span class="material-icons">edit</span></button>
+                        <button class="news-item-btn" title="Delete"><span class="material-icons">delete</span></button>
+                        <button class="news-item-btn" title="Archive"><span class="material-icons">archive</span></button>
+                    `;
+                    actionsDiv.querySelector('[title="Edit"]').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openEditNewsModal(item.id, columnId);
+                    });
+                    actionsDiv.querySelector('[title="Delete"]').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteNewsItem(item.id, columnId);
+                    });
+                    actionsDiv.querySelector('[title="Archive"]').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        archiveNewsItem(item.id, columnId);
+                    });
+                    newsItemEl.appendChild(actionsDiv);
+                }
+                feedElement.appendChild(newsItemEl);
+            });
+        }
+        function addNewsToFeed(targetColumnId, title, content, isSystem = false, maxItems = 10) {
+            if (!newsData[targetColumnId]) newsData[targetColumnId] = [];
+            const newItem = {
+                id: generateNewsItemId(),
+                title: title,
+                content: content,
+                timestamp: new Date().toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                isSystem: isSystem
+            };
+            newsData[targetColumnId].unshift(newItem); // Add to beginning
+            if (newsData[targetColumnId].length > maxItems) {
+                const oldestItem = newsData[targetColumnId].pop(); // Remove from end
+                // Optionally, automatically archive oldest item if that's desired behavior
+                // archiveNewsItem(oldestItem.id, targetColumnId, true); // true for silent archive
+            }
+            renderNewsColumn(targetColumnId);
+            saveNewsToLocalStorage();
+        }
+        function openLoginModal() {
+            loginModal.classList.add('open');
+            mainContent.classList.add('blur');
+            passwordInput.focus();
+        }
+        function closeLoginModal() {
+            loginModal.classList.remove('open');
+            mainContent.classList.remove('blur');
+        }
+        function openUserPanel() {
+            userPanel.classList.add('open');
+            logoutBtn.style.display = 'block';
+        }
+        function closeUserPanel() {
+            userPanel.classList.remove('open');
+            if (!currentUser) {
+                logoutBtn.style.display = 'none';
+            }
+        }
+        function populateAdminPanel() {
+            userPanelContent.innerHTML = `
+            <h3 class="text-xl font-steampunk-title mb-4 text-amber-300">Administrator Console</h3>
+            <div class="mb-4">
+                <label class="block mb-1 text-amber-100" for="magicInputAdmin">Set Magic Level (0-100):</label>
+                <input id="magicInputAdmin" max="100" min="0" type="number" value="${magicLevel}"/>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 text-amber-100" for="pressureInputAdmin">Set Pressure Level (0-100):</label>
+                <input id="pressureInputAdmin" max="100" min="0" type="number" value="${pressureLevel}"/>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 text-amber-100" for="darknessInputAdmin">Set Darkness Level (0-100):</label>
+                <input id="darknessInputAdmin" max="100" min="0" type="number" value="${darknessLevel}"/>
+            </div>
+            <button class="steampunk-button w-full mb-3" id="applyAdminValuesBtn">Apply World Changes</button>
+            <hr class="border-amber-700 my-4">
+            <h4 class="text-lg font-steampunk-title mb-2 text-amber-200">Map Markers</h4>
+            <button class="steampunk-button w-full mb-3" id="addMarkerBtn">Add New Map Marker</button>
+            <div id="markerListAdmin" class="max-h-48 overflow-y-auto mb-3 pr-2"></div>
+            <hr class="border-amber-700 my-4">
+            <h4 class="text-lg font-steampunk-title mb-2 text-amber-200">Publish Dispatch</h4>
+            <div class="mb-4">
+                <label class="block mb-1 text-amber-100" for="generalNewsTitleInput">Dispatch Headline (Optional):</label>
+                <input id="generalNewsTitleInput" type="text" placeholder="e.g., Urgent Bulletin!"/>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 text-amber-100" for="generalNewsContentInput">Dispatch Content:</label>
+                <textarea id="generalNewsContentInput" rows="2" placeholder="Details of the new dispatch..."></textarea>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 text-amber-100" for="dispatchTargetFeed">Target Column:</label>
+                <select id="dispatchTargetFeed">
+                    <option value="playerNewsColumn">Heroes' Herald</option>
+                    <option value="worldNewsColumn">World Stage</option>
+                    <option value="territoryNewsColumn">Regional Reports</option>
+                    <option value="randomWorldNewsColumn">Whispers on the Wind</option>
+                    <option value="localEventsNorthColumn">Northern Gazette</option>
+                    <option value="localEventsEastColumn">Eastern Scroll</option>
+                </select>
+            </div>
+            <button class="steampunk-button w-full" id="publishGeneralNewsBtn">Publish General Dispatch</button>
+        `;
+            renderAdminMarkerList();
+            document.getElementById('applyAdminValuesBtn').addEventListener('click', () => {
+                const newMagic = parseInt(document.getElementById('magicInputAdmin').value);
+                const newPressure = parseInt(document.getElementById('pressureInputAdmin').value);
+                const newDarkness = parseInt(document.getElementById('darknessInputAdmin').value);
+                updateMagicDisplay(newMagic);
+                updatePressureDisplay(newPressure);
+                updateDarknessDisplay(newDarkness);
+                addNewsToFeed('worldNewsColumn', 'World Edict', `State manually adjusted - Magic ${newMagic}%, Pressure ${newPressure}%, Darkness ${newDarkness}%.`, true);
+            });
+            document.getElementById('addMarkerBtn').addEventListener('click', () => openEditMarkerModal());
+            document.getElementById('publishGeneralNewsBtn').addEventListener('click', () => {
+                const title = document.getElementById('generalNewsTitleInput').value.trim();
+                const content = document.getElementById('generalNewsContentInput').value.trim();
+                const targetColumnId = document.getElementById('dispatchTargetFeed').value;
+                if (content && targetColumnId) {
+                    addNewsToFeed(targetColumnId, title, content);
+                    document.getElementById('generalNewsTitleInput').value = '';
+                    document.getElementById('generalNewsContentInput').value = '';
+                } else if (!content) {
+                    alert("Dispatch content cannot be empty.");
+                } else {
+                    alert("Invalid target column selected.");
+                }
+            });
+        }
+        // NEWS EDIT MODAL
+        function openEditNewsModal(itemId, columnId) {
+            const item = newsData[columnId]?.find(news => news.id === itemId);
+            if (!item) return;
+            editNewsItemIdInput.value = itemId;
+            editNewsColumnIdInput.value = columnId;
+            editNewsTitleInput.value = item.title || '';
+            editNewsContentInput.value = item.content;
+            editNewsTargetFeedSelect.value = columnId; // Set current column as default
+            newsEditModal.classList.add('open');
+            mainContent.classList.add('blur');
+        }
+        closeNewsEditModalBtn.addEventListener('click', () => {
+            newsEditModal.classList.remove('open');
+            mainContent.classList.remove('blur');
+        });
+        newsEditModal.addEventListener('click', (event) => {
+            if (event.target === newsEditModal) {
+                newsEditModal.classList.remove('open');
+                mainContent.classList.remove('blur');
+            }
+        });
+        saveNewsEditBtn.addEventListener('click', () => {
+            const itemId = editNewsItemIdInput.value;
+            const originalColumnId = editNewsColumnIdInput.value;
+            const newTitle = editNewsTitleInput.value.trim();
+            const newContent = editNewsContentInput.value.trim();
+            const newColumnId = editNewsTargetFeedSelect.value;
+            if (!newContent) {
+                alert('News content cannot be empty.');
+                return;
+            }
+            const itemIndex = newsData[originalColumnId]?.findIndex(news => news.id === itemId);
+            if (itemIndex === -1 || !newsData[originalColumnId]) return; // Item not found
+            const itemToUpdate = { ...newsData[originalColumnId][itemIndex],
+                title: newTitle,
+                content: newContent
+            };
+            // If column changed
+            if (originalColumnId !== newColumnId) {
+                newsData[originalColumnId].splice(itemIndex, 1); // Remove from original column
+                if (!newsData[newColumnId]) newsData[newColumnId] = [];
+                newsData[newColumnId].unshift(itemToUpdate); // Add to new column at the top
+                renderNewsColumn(originalColumnId);
+            } else {
+                newsData[originalColumnId][itemIndex] = itemToUpdate;
+            }
+            renderNewsColumn(newColumnId);
+            saveNewsToLocalStorage();
+            newsEditModal.classList.remove('open');
+            mainContent.classList.remove('blur');
+        });
+        function deleteNewsItem(itemId, columnId) {
+            if (!newsData[columnId]) return;
+            const itemIndex = newsData[columnId].findIndex(news => news.id === itemId);
+            if (itemIndex > -1) {
+                if (confirm('Are you sure you want to delete this news item? This cannot be undone.')) {
+                    newsData[columnId].splice(itemIndex, 1);
+                    renderNewsColumn(columnId);
+                    saveNewsToLocalStorage();
+                }
+            }
+        }
+        function archiveNewsItem(itemId, columnId, silent = false) {
+            if (!newsData[columnId]) return;
+            const itemIndex = newsData[columnId].findIndex(news => news.id === itemId);
+            if (itemIndex > -1) {
+                const itemToArchive = newsData[columnId].splice(itemIndex, 1)[0];
+                if (!newsArchive[columnId]) newsArchive[columnId] = [];
+                newsArchive[columnId].unshift(itemToArchive); // Add to archive
+                if (!silent) alert(`News item "${itemToArchive.title || 'Untitled'}" archived.`);
+                renderNewsColumn(columnId);
+                saveNewsToLocalStorage();
+            }
+        }
+        // NEWS ARCHIVE MODAL
+        document.querySelectorAll('.view-archive-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const columnId = e.currentTarget.dataset.columnId;
+                openNewsArchiveModal(columnId);
+            });
+        });
+        function openNewsArchiveModal(columnId) {
+            const columnTitle = newsColumns[columnId]?.querySelector('h4')?.textContent || 'Archive';
+            archiveModalTitle.textContent = `${columnTitle} - Archive`;
+            archiveFeed.innerHTML = ''; // Clear previous content
+            const archivedItems = newsArchive[columnId] || [];
+            if (archivedItems.length === 0) {
+                archiveFeed.innerHTML = '<p class="text-amber-100 italic text-sm">No archived news for this column.</p>';
+            } else {
+                archivedItems.forEach(item => {
+                    const archiveItemEl = document.createElement('div');
+                    archiveItemEl.classList.add('news-item', 'mb-2', 'pb-2', 'border-b', 'border-amber-700');
+                    let htmlContent = `<span class="text-sm text-amber-400">${item.timestamp}:</span> `;
+                    if (item.title) htmlContent += `<strong class="text-sm">${item.title}:</strong> `;
+                    htmlContent += `<span class="text-sm">${item.content}</span>`;
+                    if (item.isSystem) archiveItemEl.classList.add('italic', 'text-gray-400');
+                    archiveItemEl.innerHTML = htmlContent;
+                    if (currentUser && currentUser.type === 'admin') {
+                        const actionsDiv = document.createElement('div');
+                        actionsDiv.classList.add('news-item-actions', 'opacity-100', 'static', 'mt-1'); // Always visible in archive
+                        actionsDiv.innerHTML = `
+                            <button class="news-item-btn text-xs" title="Restore"><span class="material-icons text-sm">unarchive</span> Restore</button>
+                            <button class="news-item-btn text-xs text-red-400 hover:text-red-300" title="Delete Permanently"><span class="material-icons text-sm">delete_forever</span> Delete</button>
+                        `;
+                        actionsDiv.querySelector('[title="Restore"]').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            restoreNewsItem(item.id, columnId);
+                        });
+                        actionsDiv.querySelector('[title="Delete Permanently"]').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            deleteArchivedNewsItem(item.id, columnId);
+                        });
+                        archiveItemEl.appendChild(actionsDiv);
+                    }
+                    archiveFeed.appendChild(archiveItemEl);
+                });
+            }
+            newsArchiveModal.classList.add('open');
+            mainContent.classList.add('blur');
+        }
+        closeNewsArchiveModalBtn.addEventListener('click', () => {
+            newsArchiveModal.classList.remove('open');
+            mainContent.classList.remove('blur');
+        });
+        newsArchiveModal.addEventListener('click', (event) => {
+            if (event.target === newsArchiveModal) {
+                newsArchiveModal.classList.remove('open');
+                mainContent.classList.remove('blur');
+            }
+        });
+        function restoreNewsItem(itemId, columnId) {
+            if (!newsArchive[columnId]) return;
+            const itemIndex = newsArchive[columnId].findIndex(news => news.id === itemId);
+            if (itemIndex > -1) {
+                const itemToRestore = newsArchive[columnId].splice(itemIndex, 1)[0];
+                if (!newsData[columnId]) newsData[columnId] = [];
+                newsData[columnId].unshift(itemToRestore); // Add back to active news at the top
+                renderNewsColumn(columnId);
+                openNewsArchiveModal(columnId); // Refresh archive modal view
+                saveNewsToLocalStorage();
+                alert(`News item "${itemToRestore.title || 'Untitled'}" restored.`);
+            }
+        }
+        function deleteArchivedNewsItem(itemId, columnId) {
+            if (!newsArchive[columnId]) return;
+            const itemIndex = newsArchive[columnId].findIndex(news => news.id === itemId);
+            if (itemIndex > -1) {
+                if (confirm('Are you sure you want to permanently delete this archived item? This cannot be undone.')) {
+                    newsArchive[columnId].splice(itemIndex, 1);
+                    openNewsArchiveModal(columnId); // Refresh archive modal view
+                    saveNewsToLocalStorage();
+                }
+            }
+        }
+        function renderAdminMarkerList() {
+            const markerListAdmin = document.getElementById('markerListAdmin');
+            if (!markerListAdmin) return;
+            markerListAdmin.innerHTML = '';
+            if (mapMarkers.length === 0) {
+                markerListAdmin.innerHTML = '<p class="text-amber-100 italic text-sm">No markers defined.</p>';
+                return;
+            }
+            mapMarkers.forEach(marker => {
+                const item = document.createElement('div');
+                item.classList.add('flex', 'justify-between', 'items-center', 'p-1', 'border-b', 'border-amber-700');
+                item.innerHTML = `
+                <span class="text-amber-100 text-sm">${marker.name} (X:${marker.x.toFixed(1)}, Y:${marker.y.toFixed(1)})</span>
+                <div>
+                    <button class="text-sky-300 hover:text-sky-100 text-xs p-1 edit-marker-btn" data-id="${marker.id}"><span class="material-icons text-base align-middle">edit</span></button>
+                    <button class="text-red-400 hover:text-red-200 text-xs p-1 delete-marker-btn" data-id="${marker.id}"><span class="material-icons text-base align-middle">delete</span></button>
+                </div>
+            `;
+                markerListAdmin.appendChild(item);
+            });
+            markerListAdmin.querySelectorAll('.edit-marker-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => openEditMarkerModal(e.currentTarget.dataset.id));
+            });
+            markerListAdmin.querySelectorAll('.delete-marker-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (confirm('Are you sure you want to delete this marker?')) {
+                        deleteMarker(e.currentTarget.dataset.id);
+                    }
+                });
+            });
+        }
+        function openEditMarkerModal(markerId = null) {
+            const existingModal = document.getElementById('markerEditModal');
+            if (existingModal) existingModal.remove();
+            const marker = markerId ? mapMarkers.find(m => m.id === markerId) : null;
+            const modal = document.createElement('div');
+            modal.id = 'markerEditModal';
+            modal.classList.add('login-modal', 'open');
+            modal.style.zIndex = "300";
+            modal.innerHTML = `
+            <div class="login-form steampunk-border relative w-96">
+                <button class="absolute top-2 right-3 text-amber-100 hover:text-amber-300 text-2xl" id="closeMarkerModalBtn">
+                    <span class="material-icons">close</span>
+                </button>
+                <h3 class="text-xl font-steampunk-title mb-4 text-center text-amber-300">${markerId ? 'Edit' : 'Add'} Map Marker</h3>
+                <input type="hidden" id="markerIdInput" value="${markerId || ''}">
+                <div class="mb-3">
+                    <label class="block mb-1 text-amber-100 text-sm" for="markerNameInput">Name:</label>
+                    <input id="markerNameInput" type="text" value="${marker ? marker.name : ''}" placeholder="Location Name"/>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block mb-1 text-amber-100 text-sm" for="markerXInput">X (%):</label>
+                        <input id="markerXInput" type="number" min="0" max="100" step="0.1" value="${marker ? marker.x.toFixed(1) : '50.0'}"/>
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-amber-100 text-sm" for="markerYInput">Y (%):</label>
+                        <input id="markerYInput" type="number" min="0" max="100" step="0.1" value="${marker ? marker.y.toFixed(1) : '50.0'}"/>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="block mb-1 text-amber-100 text-sm" for="markerIconInput">Icon (Material Icon Name):</label>
+                    <input id="markerIconInput" type="text" value="${marker ? marker.icon || 'place' : 'place'}" placeholder="e.g., place, castle, forest"/>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 text-amber-100 text-sm" for="markerColorInput">Color (hex or Tailwind class e.g., red, blue-500):</label>
+                    <input id="markerColorInput" type="text" value="${marker ? marker.color : 'red'}" placeholder="#FF0000 or red"/>
+                </div>
+                <button class="steampunk-button w-full" id="saveMarkerBtn">Save Marker</button>
+            </div>
+        `;
+            document.body.appendChild(modal);
+            document.getElementById('closeMarkerModalBtn').addEventListener('click', () => modal.remove());
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) modal.remove();
+            });
+            document.getElementById('saveMarkerBtn').addEventListener('click', saveMarker);
+        }
+        function saveMarker() {
+            const id = document.getElementById('markerIdInput').value;
+            const name = document.getElementById('markerNameInput').value.trim();
+            const x = parseFloat(document.getElementById('markerXInput').value);
+            const y = parseFloat(document.getElementById('markerYInput').value);
+            const icon = document.getElementById('markerIconInput').value.trim() || 'place';
+            const color = document.getElementById('markerColorInput').value.trim() || 'red';
+            if (!name || isNaN(x) || isNaN(y)) {
+                alert('Name, X, and Y coordinates are required.');
+                return;
+            }
+            if (id) {
+                const index = mapMarkers.findIndex(m => m.id === id);
+                if (index > -1) {
+                    mapMarkers[index] = { ...mapMarkers[index],
+                        name,
+                        x,
+                        y,
+                        icon,
+                        color
+                    };
+                }
+            } else {
+                mapMarkers.push({
+                    id: `marker_${Date.now()}`,
+                    name,
+                    x,
+                    y,
+                    icon,
+                    color
+                });
+            }
+            renderMapMarkers();
+            renderAdminMarkerList();
+            document.getElementById('markerEditModal').remove();
+            saveMapDataToLocalStorage();
+        }
+        function deleteMarker(markerId) {
+            mapMarkers = mapMarkers.filter(m => m.id !== markerId);
+            renderMapMarkers();
+            renderAdminMarkerList();
+            saveMapDataToLocalStorage();
+        }
+        function populatePlayerPanel(playerName) {
+            const playerData = {
+                "cogsworth": {
+                    name: "Cogsworth 'Clank' Copperbottom",
+                    class: "Artificer",
+                    level: 5,
+                    quests: 3,
+                    gold: 150
+                },
+                "lyra": {
+                    name: "Lyra Whisperwind",
+                    class: "Bard",
+                    level: 4,
+                    quests: 2,
+                    gold: 220
+                },
+                "gronak": {
+                    name: "Gronak Stonefist",
+                    class: "Barbarian",
+                    level: 6,
+                    quests: 5,
+                    gold: 90
+                }
+            };
+            const player = playerData[playerName.toLowerCase()];
+            if (!player) {
+                userPanelContent.innerHTML = `<p class="text-red-400">Error: Player data not found for ${playerName}.</p>`;
+                return;
+            }
+            userPanelContent.innerHTML = `
+            <h3 class="text-xl font-steampunk-title mb-4 text-amber-300">${player.name}'s Dossier</h3>
+            <div class="player-stat-card steampunk-border bg-opacity-50">
+                <div class="player-stat-item">
+                    <span class="player-stat-label">Class:</span>
+                    <span class="player-stat-value">${player.class}</span>
+                </div>
+                <div class="player-stat-item">
+                    <span class="player-stat-label">Level:</span>
+                    <span class="player-stat-value">${player.level}</span>
+                </div>
+                <div class="player-stat-item">
+                    <span class="player-stat-label">Quests Active:</span>
+                    <span class="player-stat-value">${player.quests}</span>
+                </div>
+                <div class="player-stat-item">
+                    <span class="player-stat-label">Coin Pouch:</span>
+                    <span class="player-stat-value">${player.gold} Gold Cogs</span>
+                </div>
+            </div>
+            <p class="mt-3 text-sm text-amber-200 italic">"The gears of fate turn for us all, adventurer."</p>
+        `;
+        }
+        toggleUserPanelBtn.addEventListener('click', () => {
+            if (currentUser) {
+                userPanel.classList.contains('open') ? closeUserPanel() : openUserPanel();
+            } else {
+                openLoginModal();
+            }
+        });
+        closeLoginModalBtn.addEventListener('click', closeLoginModal);
+        loginModal.addEventListener('click', (event) => {
+            if (event.target === loginModal) {
+                closeLoginModal();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                if (loginModal.classList.contains('open')) closeLoginModal();
+                if (newsEditModal.classList.contains('open')) {
+                    newsEditModal.classList.remove('open');
+                    mainContent.classList.remove('blur');
+                }
+                if (newsArchiveModal.classList.contains('open')) {
+                    newsArchiveModal.classList.remove('open');
+                    mainContent.classList.remove('blur');
+                }
+                const markerModal = document.getElementById('markerEditModal');
+                if (markerModal && markerModal.classList.contains('open')) markerModal.remove();
+            }
+            if (event.key === 'Enter' && loginModal.classList.contains('open') && document.activeElement !== loginBtn) {
+                loginBtn.click();
+            }
+        });
+        const playerData = {
+            "cogsworth": {
+                name: "Cogsworth 'Clank' Copperbottom",
+                class: "Artificer",
+                level: 5,
+                quests: 3,
+                gold: 150
+            },
+            "lyra": {
+                name: "Lyra Whisperwind",
+                class: "Bard",
+                level: 4,
+                quests: 2,
+                gold: 220
+            },
+            "gronak": {
+                name: "Gronak Stonefist",
+                class: "Barbarian",
+                level: 6,
+                quests: 5,
+                gold: 90
+            }
+        };
+        loginBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            const pass = passwordInput.value;
+            if (username.toLowerCase() === "admin" && pass === "password123") {
+                currentUser = {
+                    type: 'admin',
+                    name: 'Administrator'
+                };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                addNewsToFeed('worldNewsColumn', 'System Access', `Administrator ${currentUser.name} logged in.`, true);
+                closeLoginModal();
+                populateAdminPanel();
+                openUserPanel();
+            } else if (playerData[username.toLowerCase()] && pass === "playerpass") {
+                currentUser = {
+                    type: 'player',
+                    name: username
+                };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                addNewsToFeed('worldNewsColumn', 'Player Access', `${playerData[username.toLowerCase()].name} has entered the chronicles.`, true);
+                closeLoginModal();
+                populatePlayerPanel(username);
+                openUserPanel();
+            } else {
+                alert('Invalid credentials. The gears grind in disapproval.');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+            if (currentUser) {
+                usernameInput.value = '';
+                passwordInput.value = '';
+                Object.keys(newsColumns).forEach(renderNewsColumn); // Re-render all columns to show/hide admin buttons
+            }
+            renderMapMarkers(); // Re-render map markers for admin controls
+        });
+        logoutBtn.addEventListener('click', () => {
+            if (currentUser) {
+                addNewsToFeed('worldNewsColumn', `${currentUser.type === 'admin' ? 'System Access' : 'Player Access'}`, `${currentUser.type === 'admin' ? currentUser.name : playerData[currentUser.name.toLowerCase()].name} logged out.`, true);
+            }
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            closeUserPanel();
+            userPanelContent.innerHTML = '';
+            logoutBtn.style.display = 'none';
+            Object.keys(newsColumns).forEach(renderNewsColumn); // Re-render all columns
+            renderMapMarkers(); // Re-render map markers
+        });
+        mapUploadInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    interactiveMapContent.style.backgroundImage = `url(${e.target.result})`;
+                    localStorage.setItem('customMapImage', e.target.result);
+                    resetMapTransformAndSize();
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        function resetMapTransformAndSize() {
+            mapScale = 1;
+            mapPosX = 0;
+            mapPosY = 0;
+            const img = new Image();
+            img.onload = () => {
+                const aspectRatio = img.width / img.height;
+                const containerWidth = interactiveMapContainer.offsetWidth;
+                const containerHeight = interactiveMapContainer.offsetHeight;
+                if (containerWidth / containerHeight > aspectRatio) {
+                    interactiveMapContent.style.width = `${containerHeight * aspectRatio}px`;
+                    interactiveMapContent.style.height = `${containerHeight}px`;
+                } else {
+                    interactiveMapContent.style.width = `${containerWidth}px`;
+                    interactiveMapContent.style.height = `${containerWidth / aspectRatio}px`;
+                }
+                applyMapTransform();
+                renderMapMarkers();
+            };
+            const currentBgImage = interactiveMapContent.style.backgroundImage;
+            if (currentBgImage && currentBgImage !== 'none') {
+                img.src = currentBgImage.slice(5, -2);
+            } else {
+                interactiveMapContent.style.width = '100%';
+                interactiveMapContent.style.height = '100%';
+                applyMapTransform();
+                renderMapMarkers();
+            }
+        }
+        function loadMapDataFromLocalStorage() {
+            const storedMapData = localStorage.getItem('interactiveMapMarkers');
+            if (storedMapData) {
+                mapMarkers = JSON.parse(storedMapData);
+            }
+            const storedMapImage = localStorage.getItem('customMapImage');
+            if (storedMapImage) {
+                interactiveMapContent.style.backgroundImage = `url(${storedMapImage})`;
+            } else {
+                // Default map if none is uploaded/stored
+                interactiveMapContent.style.backgroundImage = `url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAJYCAYAAACadoJwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAXvSURBVHhe7dExAQAAAMKg9U9tCU+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAGxtAAGy4N4jAAAAAElFTkSuQmCC")`;
+            }
+            resetMapTransformAndSize();
+        }
+        function saveMapDataToLocalStorage() {
+            localStorage.setItem('interactiveMapMarkers', JSON.stringify(mapMarkers));
+        }
+        function loadNewsFromLocalStorage() {
+            const storedNewsData = localStorage.getItem('newsDashboardData');
+            const storedNewsArchive = localStorage.getItem('newsDashboardArchive');
+            if (storedNewsData) newsData = JSON.parse(storedNewsData);
+            if (storedNewsArchive) newsArchive = JSON.parse(storedNewsArchive);
+            // Initialize newsData for columns if not present (e.g. after clearing local storage or first load)
+            Object.keys(newsColumns).forEach(columnId => {
+                if (!newsData[columnId]) newsData[columnId] = [];
+                if (!newsArchive[columnId]) newsArchive[columnId] = [];
+                renderNewsColumn(columnId); // Render each column with loaded or default data
+            });
+        }
+        function saveNewsToLocalStorage() {
+            localStorage.setItem('newsDashboardData', JSON.stringify(newsData));
+            localStorage.setItem('newsDashboardArchive', JSON.stringify(newsArchive));
+        }
+        if (newsPanelHeader) {
+            newsPanelHeader.addEventListener('click', () => {
+                newsPanel.classList.toggle('collapsed');
+                const icon = toggleNewsBtn.querySelector('.material-icons');
+                if (newsPanel.classList.contains('collapsed')) {
+                    icon.textContent = 'expand_more';
+                } else {
+                    icon.textContent = 'expand_less';
+                }
+            });
+        }
+        // INITIALIZATION
+        loadMapDataFromLocalStorage();
+        loadNewsFromLocalStorage(); // Load news after defining newsData and newsArchive
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            currentUser = JSON.parse(storedUser);
+            // addNewsToFeed('worldNewsColumn', 'Session Restored', `Welcome back, ${currentUser.type === 'admin' ? currentUser.name : playerData[currentUser.name.toLowerCase()]?.name || currentUser.name}.`, true);
+            if (currentUser.type === 'admin') {
+                populateAdminPanel();
+            } else if (currentUser.type === 'player') {
+                populatePlayerPanel(currentUser.name);
+            }
+            logoutBtn.style.display = 'block';
+            Object.keys(newsColumns).forEach(renderNewsColumn); // Ensure admin buttons are shown/hidden
+            renderMapMarkers(); // Ensure admin map controls are set
+        }
+        updateMagicDisplay(30);
+        updatePressureDisplay(60);
+        updateDarknessDisplay(45);
+        // Auto-generate example news if feeds are empty on first load (after stored data load)
+        if (Object.values(newsData).every(arr => arr.length === 0)) {
+            addNewsToFeed('worldNewsColumn', "System Online", "World state nominal.", true);
+            addNewsToFeed('playerNewsColumn', '', 'Awaiting dispatches on the adventurers\' latest exploits...', false, 1); // Placeholder for player news
+            addNewsToFeed('territoryNewsColumn', 'Ironclad Peaks', 'Miners unearth a strange, pulsating ore deep within Mount Cinder. The Foreman has called for investigation.', false);
+            addNewsToFeed('randomWorldNewsColumn', '', 'A peculiar comet was sighted over the capital, its tail shimmering with unknown energies.', false);
+        }
+        setInterval(() => {
+            if (!userPanel.classList.contains('open') || (currentUser && currentUser.type !== 'admin')) {
+                let magicChange = Math.floor(Math.random() * 7) - 3;
+                let pressureChange = Math.floor(Math.random() * 7) - 3;
+                let darknessChange = Math.floor(Math.random() * 5) - 2;
+                updateMagicDisplay(magicLevel + magicChange);
+                updatePressureDisplay(pressureLevel + pressureChange);
+                updateDarknessDisplay(darknessLevel + darknessChange);
+                if (Math.random() < 0.1) {
+                    const randomWorldEvents = [
+                        "Anomalous energy spike detected near the Aetherium Core!",
+                        "Tectonic shifts reported from the Obsidian Peaks. Geologists puzzled.",
+                        "Sky-merchant caravan overdue. Foul play suspected, or just bad weather?",
+                    ];
+                    addNewsToFeed('randomWorldNewsColumn', 'Whispers', randomWorldEvents[Math.floor(Math.random() * randomWorldEvents.length)]);
+                }
+                if (Math.random() < 0.15) {
+                    const localEvents = [{
+                        columnId: 'localEventsNorthColumn',
+                        terrain: "Boreal Wilds",
+                        events: ["The annual Ice Sculpture contest in Frostwind Pass is seeking participants."]
+                    }, {
+                        columnId: 'localEventsEastColumn',
+                        terrain: "Sunken Depths",
+                        events: ["Fishermen in Saltspire netted a colossal squid."]
+                    }, ];
+                    const randomRegion = localEvents[Math.floor(Math.random() * localEvents.length)];
+                    const randomEvent = randomRegion.events[Math.floor(Math.random() * randomRegion.events.length)];
+                    addNewsToFeed(randomRegion.columnId, `(${randomRegion.terrain})`, randomEvent);
+                }
+            }
+        }, 7000);
+    </script>
+
+</body></html>
